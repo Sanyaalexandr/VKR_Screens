@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Учётная запись — Корпоративная столовая</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+
+  .logo {
+    width: 64px; height: 64px;
+    background: #FFDD2D;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700; color: #333;
+    margin: 0 auto 24px;
+  }
+
+  .name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+  }
+
+  .role {
+    font-size: 13px;
+    color: #999;
+    margin-top: 4px;
+  }
+
+  .email {
+    font-size: 14px;
+    color: #666;
+    margin-top: 16px;
+    margin-bottom: 28px;
+  }
+
+  .btn-logout {
+    width: 100%;
+    padding: 14px;
+    background: #fff;
+    color: #d32f2f;
+    font-size: 15px;
+    font-weight: 700;
+    border: 2px solid #fdd;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.1s;
+  }
+  .btn-logout:hover { background: #fff5f5; border-color: #faa; }
+  .btn-logout:active { transform: scale(0.98); }
+
+  .btn-back {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    color: #888;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: color 0.2s;
+  }
+  .btn-back:hover { color: #333; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">Т</div>
+  <div class="name" id="displayName"></div>
+  <div class="role" id="role"></div>
+  <div class="email" id="email"></div>
+  <button class="btn-logout" id="logoutBtn">Выйти из системы</button>
+  <button class="btn-back" id="backBtn">← Назад</button>
+</div>
+
+<script>
+const user = {
+  fullName: 'Петров Алексей Сергеевич',
+  role: 'Сотрудник',
+  email: 'petrov@tbank.ru'
+};
+
+document.getElementById('displayName').textContent = user.fullName;
+document.getElementById('role').textContent = user.role;
+document.getElementById('email').textContent = user.email;
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  if (!confirm('Вы действительно хотите завершить сессию?')) return;
+  location.href = 'авторизация.html';
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  history.back();
+});
+</script>
+</body>
+</html>

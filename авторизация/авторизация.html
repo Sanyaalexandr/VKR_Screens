@@ -154,6 +154,14 @@
     <button type="submit" class="btn">Войти</button>
   </form>
 
+  <div class="quick-login">
+    <p>Демо-вход:</p>
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="quickLogin('petrov')">Петров (ДИТ)</button>
+      <button class="quick-btn" onclick="quickLogin('sidorova')">Сидорова (Бухгалтерия)</button>
+    </div>
+  </div>
+
   <p class="footer-text">ИС «Корпоративная столовая» v1.0</p>
 </div>
 
@@ -180,6 +188,12 @@ form.addEventListener('submit', (e) => {
     showError('Неверный логин или пароль');
   }
 });
+
+function quickLogin(login) {
+  document.getElementById('login').value = login;
+  document.getElementById('password').value = '123';
+  form.dispatchEvent(new Event('submit'));
+}
 </script>
 </body>
 </html>
