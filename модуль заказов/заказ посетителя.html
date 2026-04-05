@@ -1,0 +1,666 @@
+ <head lang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Мой заказ — корпоративная столовая</title>
+  <style>
+    :root{
+      --t-yellow:#FFDD2D;
+      --t-yellow-2:#FFE86A;
+      --t-black:#111111;
+      --t-text:#1b1b1b;
+      --t-muted:#6b7280;
+      --t-border:#e7e7ea;
+      --t-bg:#f6f7fb;
+      --t-card:#ffffff;
+      --t-shadow: 0 14px 40px rgba(17,17,17,.08);
+      --t-radius:18px;
+      --t-radius-sm:12px;
+      --t-focus: 0 0 0 3px rgba(255, 221, 45, .45);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      color:var(--t-text);
+      background:
+        radial-gradient(1200px 800px at 20% -10%, rgba(255,221,45,.35), transparent 55%),
+        radial-gradient(900px 600px at 105% 15%, rgba(255,221,45,.20), transparent 50%),
+        var(--t-bg);
+    }
+
+    /* ======= TEST PANEL ======= */
+    .test-panel{
+      position:fixed;left:16px;bottom:16px;z-index:50;
+      width:min(480px, calc(100% - 32px));
+      background:rgba(255,255,255,.92);backdrop-filter: blur(8px);
+      border:1px solid var(--t-border);border-radius:14px;
+      box-shadow: 0 16px 40px rgba(17,17,17,.12);padding:12px;
+    }
+    .test-panel__title{
+      display:flex;align-items:center;gap:10px;
+      font-weight:700;font-size:13px;color:#2c2c2c;margin-bottom:8px;
+    }
+    .test-panel__badge{
+      width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+      background:linear-gradient(180deg, var(--t-yellow), var(--t-yellow-2));
+      border:1px solid rgba(17,17,17,.08);font-weight:900;color:var(--t-black);
+    }
+    .test-panel__row{display:flex;flex-wrap:wrap;gap:8px}
+    .btn{
+      appearance:none;border:1px solid rgba(17,17,17,.12);background:#fff;
+      color:var(--t-black);border-radius:12px;padding:9px 10px;font-weight:650;
+      font-size:13px;cursor:pointer;transition:transform .04s ease, box-shadow .12s ease, background .12s ease;
+    }
+    .btn:hover{background:#fcfcfd}
+    .btn:active{transform: translateY(1px)}
+    .btn:focus{outline:none;box-shadow:var(--t-focus)}
+    .btn--primary{background:linear-gradient(180deg, var(--t-yellow), var(--t-yellow-2));border-color:rgba(17,17,17,.12)}
+    .btn--danger{background:#fff;border-color:rgba(239,68,68,.35);color:#b42318}
+    .btn--ghost{background:transparent;border-color:rgba(17,17,17,.14)}
+
+    /* ======= PAGE ======= */
+    .wrap{
+      min-height:100%;display:grid;place-items:center;padding:34px 16px 90px;
+    }
+    .screen{
+      width:min(620px, 100%);
+    }
+
+    /* ======= CARD ======= */
+    .card{
+      background:var(--t-card);border:1px solid var(--t-border);
+      border-radius:var(--t-radius);box-shadow:var(--t-shadow);overflow:hidden;
+    }
+    .card__header{
+      padding:16px 18px;
+      background:linear-gradient(90deg, rgba(255,221,45,.55), rgba(255,221,45,.15)), #fff;
+      border-bottom:1px solid rgba(17,17,17,.06);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .logo{
+      width:38px;height:38px;border-radius:14px;display:grid;place-items:center;
+      background:linear-gradient(180deg, var(--t-yellow), var(--t-yellow-2));
+      border:1px solid rgba(17,17,17,.10);
+      box-shadow:0 10px 24px rgba(255,221,45,.25);
+      font-weight:950;color:var(--t-black);font-size:18px;flex:0 0 auto;
+    }
+    .brand__meta{min-width:0;display:flex;flex-direction:column;gap:2px}
+    .brand__title{margin:0;font-size:16px;line-height:1.2;font-weight:850;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand__subtitle{margin:0;font-size:12.5px;color:var(--t-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 10px;
+      background:#fff;border:1px solid rgba(17,17,17,.10);border-radius:999px;
+      box-shadow:0 6px 18px rgba(17,17,17,.06);font-size:12.5px;font-weight:650;color:#2a2a2a;flex:0 0 auto;
+    }
+    .chip__dot{width:10px;height:10px;border-radius:999px;background:#9ca3af;box-shadow:inset 0 0 0 2px rgba(255,255,255,.9)}
+    .card__body{padding:16px 18px}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(17,17,17,.10);background:#fff;font-size:12.5px;font-weight:750;color:#1f2937;
+    }
+    .pill__dot{width:9px;height:9px;border-radius:999px;background:#9ca3af;box-shadow:inset 0 0 0 2px rgba(255,255,255,.9)}
+    .pill--yellow{background:rgba(255,221,45,.25);border-color:rgba(255,221,45,.55)}
+    .pill--blue{background:rgba(59,130,246,.10);border-color:rgba(59,130,246,.22)}
+    .pill--red{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22)}
+
+    .muted{color:var(--t-muted);font-size:12.5px;font-weight:650}
+
+    /* Top meta pills */
+    .meta-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+
+    /* ======= ORDER ITEMS ======= */
+    .order-items{display:flex;flex-direction:column;gap:10px}
+    .order-item{
+      border:1px solid rgba(17,17,17,.08);border-radius:16px;padding:12px;
+      background:linear-gradient(180deg, rgba(255,221,45,.08), transparent 40%), #fff;
+      display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;
+    }
+    .order-item__name{margin:0;font-weight:900;font-size:14px;color:#111;line-height:1.25}
+    .order-item__meta{margin:6px 0 0;color:var(--t-muted);font-size:12.5px;font-weight:650;display:flex;gap:10px;flex-wrap:wrap}
+    .kcal{
+      display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;
+      border:1px solid rgba(17,17,17,.08);background:#fff;font-size:12px;font-weight:800;color:#111;
+    }
+
+    .qty{
+      display:flex;align-items:center;gap:4px;margin-top:6px;
+    }
+    .qty-btn{
+      width:30px;height:30px;border-radius:10px;border:1px solid rgba(17,17,17,.10);
+      background:#fff;font-weight:900;font-size:16px;color:var(--t-black);cursor:pointer;
+      display:grid;place-items:center;
+    }
+    .qty-btn:hover{background:#f8f8f9}
+    .qty-btn:focus{outline:none;box-shadow:var(--t-focus)}
+    .qty-value{
+      min-width:34px;height:34px;border-radius:12px;border:1px solid rgba(17,17,17,.10);
+      background:#fff;display:grid;place-items:center;font-weight:950;font-size:14px;
+    }
+    .remove-btn{
+      width:30px;height:30px;border-radius:10px;border:1px solid rgba(239,68,68,.25);
+      background:rgba(239,68,68,.06);font-weight:900;font-size:14px;color:#b42318;cursor:pointer;
+      display:grid;place-items:center;
+    }
+    .remove-btn:hover{background:rgba(239,68,68,.12)}
+    .remove-btn:focus{outline:none;box-shadow:0 0 0 3px rgba(239,68,68,.25)}
+
+    /* ======= SUMMARY ======= */
+    .divider{height:1px;background:rgba(17,17,17,.08);margin:14px 0}
+
+    .summary{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      border:1px solid rgba(17,17,17,.08);border-radius:18px;padding:14px;
+      background:linear-gradient(90deg, rgba(255,221,45,.22), rgba(255,221,45,.06)), #fff;
+    }
+    .summary__label{margin:0;font-size:12.5px;color:var(--t-muted);font-weight:750}
+    .summary__value{margin:6px 0 0;font-size:16px;font-weight:950;color:#111}
+
+    .action-bar{display:flex;gap:8px;margin-top:12px}
+    .action-bar .btn{flex:1;justify-content:center}
+
+    .empty-cart{
+      text-align:center;padding:30px 10px;color:var(--t-muted);
+    }
+    .empty-cart__icon{
+      width:48px;height:48px;border-radius:18px;display:grid;place-items:center;
+      background:rgba(255,221,45,.20);border:1px solid rgba(255,221,45,.35);
+      margin:0 auto 12px;font-size:22px;color:#b09600;
+    }
+    .empty-cart__text{font-size:14px;font-weight:700;margin-bottom:4px;color:#374151}
+    .empty-cart__hint{font-size:12.5px;color:var(--t-muted)}
+
+    /* ======= LIMITS BOX ======= */
+    .limits{
+      border:1px solid rgba(17,17,17,.08);border-radius:16px;padding:12px;
+      background:#fff;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;
+    }
+    .limits__title{
+      width:100%;font-size:12px;font-weight:800;color:#374151;margin-bottom:2px;
+    }
+    .limit-chip{
+      display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;
+      border:1px solid rgba(17,17,17,.08);background:#fff;font-size:12px;font-weight:700;color:#111;
+    }
+    .limit-chip.done{
+      border-color:rgba(245,158,11,.35);background:rgba(255,221,45,.15);color:#8a6100;
+    }
+    .limit-chip__used{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;font-size:11px;
+      padding:1px 5px;border-radius:999px;background:rgba(17,17,17,.06);
+    }
+
+    /* ======= RULE ======= */
+    .rule{
+      margin-top:12px;padding:12px 12px;border-radius:16px;
+      border:1px solid rgba(17,17,17,.08);background:#fff;
+      display:flex;gap:10px;align-items:flex-start;
+    }
+    .rule__icon{
+      width:34px;height:34px;border-radius:14px;display:grid;place-items:center;
+      background:rgba(255,221,45,.35);border:1px solid rgba(255,221,45,.55);
+      color:#111;font-weight:950;flex:0 0 auto;
+    }
+    .rule__text{margin:0;font-size:12.5px;color:#374151;line-height:1.35;font-weight:650}
+
+    /* ======= MODAL ======= */
+    .modal-overlay{
+      position:fixed;inset:0;z-index:100;background:rgba(17,17,17,.40);
+      display:none;place-items:center;padding:16px;
+    }
+    .modal-overlay.open{display:grid}
+    .modal{
+      width:min(460px, 100%);background:#fff;border-radius:var(--t-radius);
+      box-shadow:0 24px 60px rgba(17,17,17,.18);overflow:hidden;
+    }
+    .modal__header{
+      padding:16px 18px;
+      background:linear-gradient(90deg, rgba(255,221,45,.55), rgba(255,221,45,.15)), #fff;
+      border-bottom:1px solid rgba(17,17,17,.06);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .modal__header h2{margin:0;font-size:15px;font-weight:900}
+    .modal__body{padding:16px 18px}
+    .modal__body>p{margin:0 0 10px;font-size:13px;line-height:1.4;color:#374151}
+    .modal__items{
+      border:1px solid rgba(17,17,17,.08);border-radius:14px;overflow:hidden;margin-bottom:12px;
+    }
+    .modal__items-h{
+      padding:10px 12px;font-size:12px;color:var(--t-muted);font-weight:800;
+      border-bottom:1px solid rgba(17,17,17,.08);background:rgba(255,221,45,.12);
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .modal__row{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:10px 12px;border-bottom:1px solid rgba(17,17,17,.06);font-size:13px;
+    }
+    .modal__row:last-child{border-bottom:none}
+    .modal__footer{padding:12px 18px 16px;display:flex;gap:8px}
+    .modal__footer .btn{flex:1;justify-content:center}
+
+    /* ======= SUCCESS MODAL ======= */
+    .success-icon{
+      width:56px;height:56px;border-radius:20px;display:grid;place-items:center;
+      background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);
+      margin:0 auto 12px;font-size:28px;color:#16a34a;
+    }
+    .success-center{text-align:center}
+    .success-center h3{margin:0 0 6px;font-size:16px;font-weight:950;color:#111}
+    .success-center p{margin:0;font-size:13px;color:var(--t-muted);line-height:1.35}
+
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  <body</style>
+</head>
+
+>
+  <!-- TEST PANEL -->
+  <div class="test-panel" aria-label="Панель тестирования">
+    <div class="test-panel__title">
+      <div class="test-panel__badge">Т</div>
+      Тест: состояние заказа
+    </div>
+    <div class="test-panel__row">
+      <button class="btn btn--primary" id="btnPreload">Заполнить</button>
+      <button class="btn btn--ghost" id="btnClear">Очистить</button>
+      <button class="btn btn--ghost" id="btnBreakfast">Завтрак</button>
+      <button class="btn btn--ghost" id="btnLunch">Обед</button>
+    </div>
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Подтверждение заказа">
+    <div class="modal">
+      <div class="modal__header">
+        <h2>Подтверждение заказа</h2>
+        <div class="chip">
+          <span class="chip__dot"></span>
+          <span id="modalSlot">Обед</span>
+        </div>
+      </div>
+      <div class="modal__body">
+        <p>Проверьте состав заказа. После отправки изменить его будет нельзя до следующего слота.</p>
+        <div class="modal__items">
+          <div class="modal__items-h">
+            <span>Состав заказа</span>
+            <span id="modalCount" class="muted">—</span>
+          </div>
+          <div id="modalItems"></div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--ghost" id="modalCancel" type="button">Отменить</button>
+        <button class="btn btn--primary" id="modalConfirm" type="button">Отправить заказ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS MODAL -->
+  <div class="modal-overlay" id="successOverlay" role="dialog" aria-modal="true" aria-label="Заказ отправлен">
+    <div class="modal">
+      <div class="modal__body" style="padding:24px 18px 20px">
+        <div class="success-center">
+          <div class="success-icon" aria-hidden="true">✓</div>
+          <h3>Заказ отправлен</h3>
+          <p id="successText">Ваш заказ принят. Статус можно отследить на странице «Мой заказ».</p>
+        </div>
+        <div style="margin-top:16px">
+          <button class="btn btn--primary" id="successClose" type="button" style="width:100%;justify-content:center">Отлично</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section class="screen" aria-label="Мой заказ">
+      <div class="card" role="region" aria-label="Мой заказ">
+        <div class="card__header">
+          <div class="brand">
+            <div class="logo" aria-hidden="true">Т</div>
+            <div class="brand__meta">
+              <h1 class="brand__title">Мой заказ</h1>
+              <p class="brand__subtitle" id="subtitleLine">Сегодня · Обед</p>
+            </div>
+          </div>
+          <div class="chip" title="Статус">
+            <span class="chip__dot" id="statusDot"></span>
+            <span id="statusText">Черновик</span>
+          </div>
+        </div>
+
+        <div class="card__body">
+          <!-- Date & Slot pills -->
+          <div class="meta-row">
+            <span class="pill pill--yellow" id="datePill">
+              <span class="pill__dot"></span>
+              <span id="dateText">—</span>
+            </span>
+            <span class="pill pill--blue" id="slotPill">
+              <span class="pill__dot"></span>
+              <span id="slotWindow">12:30–17:00</span>
+            </span>
+          </div>
+
+          <!-- Limits -->
+          <div class="limits" id="limitsBox" aria-label="Лимиты на заказ">
+            <div class="limits__title">Лимиты на текущий заказ</div>
+            <div id="limitsChips"></div>
+          </div>
+
+          <div id="cartBody">
+            <div class="empty-cart" id="emptyCart">
+              <div class="empty-cart__icon" aria-hidden="true">+</div>
+              <div class="empty-cart__text">Заказ пока пуст</div>
+              <div class="empty-cart__hint">Добавьте блюда из доступных порций</div>
+            </div>
+          </div>
+
+          <div id="cartActions" style="display:none">
+            <div class="divider" role="separator" aria-hidden="true"></div>
+
+            <div class="summary" aria-label="Итого">
+              <div>
+                <p class="summary__label">Позиций</p>
+                <p class="summary__value" id="totalQty">0</p>
+              </div>
+              <div>
+                <p class="summary__label">Калории</p>
+                <p class="summary__value"><span id="totalKcal">0</span></p>
+              </div>
+            </div>
+
+            <div class="action-bar">
+              <button class="btn btn--danger" id="btnClearOrder" type="button">Очистить</button>
+              <button class="btn btn--primary" id="btnSubmit" type="button">Отправить заказ</button>
+            </div>
+          </div>
+
+          <div class="rule" role="note" aria-label="Правило оформления">
+            <div class="rule__icon" aria-hidden="true">!</div>
+            <p class="rule__text">
+              Отменить или изменить заказ после отправки нельзя. Повторный заказ в этом слоте недоступен.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    // ===== DEMO MENU (для подстановки в заказ) =====
+    const MENU = {
+      1:  { name:"Суп куриный с лапшой", kcal:245, cat:"Супы" },
+      2:  { name:"Борщ говяжий со сметаной", kcal:280, cat:"Супы" },
+      3:  { name:"Салат «Овощной» (огурец, томат, зелень)", kcal:120, cat:"Салаты" },
+      4:  { name:"Салат «Цезарь» с курицей", kcal:210, cat:"Салаты" },
+      5:  { name:"Куриное филе на гриле", kcal:310, cat:"Горячее" },
+      6:  { name:"Котлета из индейки", kcal:270, cat:"Горячее" },
+      7:  { name:"Гречка с овощами", kcal:210, cat:"Гарниры" },
+      8:  { name:"Рис отварной", kcal:180, cat:"Гарниры" },
+      9:  { name:"Компот из сухофруктов", kcal:95, cat:"Напитки" },
+      10: { name:"Чай чёрный", kcal:0, cat:"Напитки" },
+    };
+
+    const LIMITS = [
+      { label:"Супы", max:1 },
+      { label:"Горячее", max:2 },
+      { label:"Гарниры", max:1 },
+      { label:"Салаты", max:1 },
+    ];
+
+    const SLOTS = [
+      { id:1, name:"Завтрак", start:"08:30", end:"10:30" },
+      { id:2, name:"Обед", start:"12:30", end:"17:00" }
+    ];
+
+    const state = {
+      currentSlot: 2,
+      cart: []  // {menuId, qty}
+    };
+
+    let submitted = false;
+
+    function pad2(n){ return String(n).padStart(2,"0"); }
+    function fmtDateRu(d){
+      return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${d.getFullYear()}`;
+    }
+    function escapeHtml(s){
+      return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    function updateSlots(){
+      const slot = SLOTS.find(s=>s.id===state.currentSlot);
+      if(slot){
+        $("slotWindow").textContent = `${slot.start}–${slot.end}`;
+        $("subtitleLine").textContent = `${fmtDateRu(new Date())} · ${slot.name}`;
+        $("modalSlot").textContent = slot.name;
+      }
+      $("dateText").textContent = `${fmtDateRu(new Date())}`;
+    }
+
+    // ===== CART RENDER =====
+    function renderCart(){
+      const body = $("cartBody");
+      const actions = $("cartActions");
+      body.innerHTML = "";
+
+      if(!state.cart.length){
+        body.innerHTML = `
+          <div class="empty-cart">
+            <div class="empty-cart__icon" aria-hidden="true">+</div>
+            <div class="empty-cart__text">Заказ пока пуст</div>
+            <div class="empty-cart__hint">Добавьте блюда из доступных порций</div>
+          </div>`;
+        actions.style.display = "none";
+        return;
+      }
+
+      actions.style.display = "";
+
+      const container = document.createElement("div");
+      container.className = "order-items";
+
+      let totalQty = 0, totalKcal = 0;
+      for(const c of state.cart){
+        const m = MENU[c.menuId];
+        if(!m) continue;
+        totalQty += c.qty;
+        totalKcal += m.kcal * c.qty;
+
+        const atLimit = isAtLimit(c.menuId);
+        const el = document.createElement("div");
+        el.className = "order-item";
+        el.innerHTML = `
+          <div>
+            <p class="order-item__name">${escapeHtml(m.name)}</p>
+            <p class="order-item__meta">
+              <span class="kcal">${m.kcal} ккал</span>
+              <span>${escapeHtml(m.cat)}</span>
+            </p>
+            <div class="qty">
+              <button class="qty-btn" data-act="dec" data-id="${c.menuId}" aria-label="Уменьшить количество">−</button>
+              <div class="qty-value" aria-label="Количество">${c.qty}</div>
+              ${atLimit
+                ? `<button class="qty-btn" disabled aria-label="Достигнут лимит" style="opacity:.4;cursor:not-allowed;background:#f5f5f5">+</button>`
+                : `<button class="qty-btn" data-act="inc" data-id="${c.menuId}" aria-label="Увеличить количество">+</button>`}
+              <button class="remove-btn" data-act="rm" data-id="${c.menuId}" aria-label="Удалить позицию">&times;</button>
+            </div>
+          </div>
+          <div>
+            <span class="pill pill--yellow"><span class="pill__dot"></span>× ${c.qty}</span>
+          </div>
+        `;
+        container.appendChild(el);
+      }
+
+      body.appendChild(container);
+
+      // Bind cart buttons
+      body.querySelectorAll("button[data-act]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = Number(btn.dataset.id);
+          const act = btn.dataset.act;
+          if(act === "inc") incQty(id);
+          else if(act === "dec") decQty(id);
+          else if(act === "rm") removeItem(id);
+        });
+      });
+
+      $("totalQty").textContent = totalQty;
+      $("totalKcal").textContent = totalKcal;
+    }
+
+    // ===== LIMITS =====
+    function catUsed(cat){
+      return state.cart.filter(c => MENU[c.menuId]?.cat === cat).reduce((s,c)=>s+c.qty, 0);
+    }
+    function limitFor(cat){
+      return LIMITS.find(l => l.label === cat);
+    }
+    function isAtLimit(menuId){
+      const m = menuId ? MENU[menuId] : null;
+      if(!m) return false;
+      const lim = limitFor(m.cat);
+      if(!lim) return false;
+      return catUsed(m.cat) >= lim.max;
+    }
+    function renderLimits(){
+      const el = $("limitsChips");
+      el.innerHTML = LIMITS.map(l=>{
+        const used = catUsed(l.label);
+        const done = used >= l.max;
+        return `<span class="limit-chip${done?' done':''}">${escapeHtml(l.label)}: <span class="limit-chip__used">${used}</span> / ${l.max}</span>`;
+      }).join("");
+    }
+
+    // ===== CART OPS =====
+    function incQty(menuId){
+      if(isAtLimit(menuId)) return;
+      const c = state.cart.find(x=>x.menuId===menuId);
+      if(c){ c.qty++; }
+      refresh();
+    }
+    function decQty(menuId){
+      const c = state.cart.find(x=>x.menuId===menuId);
+      if(c && c.qty > 1) c.qty--;
+      refresh();
+    }
+    function removeItem(menuId){
+      state.cart = state.cart.filter(c=>c.menuId !== menuId);
+      refresh();
+    }
+
+    function clearCart(){
+      state.cart = [];
+      refresh();
+    }
+
+    // ===== MODAL =====
+    function openModal(){
+      const itemsDiv = $("modalItems");
+      itemsDiv.innerHTML = "";
+
+      for(const c of state.cart){
+        const m = MENU[c.menuId];
+        if(!m) continue;
+        const row = document.createElement("div");
+        row.className = "modal__row";
+        row.innerHTML = `
+          <span style="font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(m.name)}</span>
+          <span class="pill pill--yellow" style="font-size:12px"><span class="pill__dot"></span>${c.qty}</span>
+        `;
+        itemsDiv.appendChild(row);
+      }
+
+      const totalQty = state.cart.reduce((s,c)=>s+c.qty, 0);
+      $("modalCount").textContent = `${state.cart.length} позиций, ${totalQty} шт.`;
+      $("modalOverlay").classList.add("open");
+    }
+    function closeModal(){
+      $("modalOverlay").classList.remove("open");
+    }
+
+    function openSuccess(){
+      $("successOverlay").classList.add("open");
+    }
+    function closeSuccess(){
+      $("successOverlay").classList.remove("open");
+    }
+
+    // ===== STATUS =====
+    function updateStatus(){
+      submitted = false;
+      $("statusText").textContent = state.cart.length ? "Черновик" : "Нет заказа";
+      $("statusDot").style.background = state.cart.length ? "#f59e0b" : "#9ca3af";
+    }
+
+    // ===== REFRESH =====
+    function refresh(){
+      renderCart();
+      renderLimits();
+      updateStatus();
+      updateSlots();
+    }
+
+    // ===== TEST BUTTONS =====
+    $("btnPreload").addEventListener("click", ()=>{
+      submitted = false;
+      state.cart = [
+        {menuId:1, qty:1},
+        {menuId:3, qty:1},
+        {menuId:5, qty:1},
+        {menuId:7, qty:1},
+        {menuId:9, qty:1},
+      ];
+      refresh();
+    });
+    $("btnClear").addEventListener("click", ()=> clearCart());
+    $("btnBreakfast").addEventListener("click", ()=>{
+      state.currentSlot = 1;
+      submitted = false;
+      refresh();
+    });
+    $("btnLunch").addEventListener("click", ()=>{
+      state.currentSlot = 2;
+      submitted = false;
+      refresh();
+    });
+
+    $("btnClearOrder").addEventListener("click", ()=> clearCart());
+    $("btnSubmit").addEventListener("click", ()=>{
+      if(state.cart.length) openModal();
+    });
+
+    $("modalCancel").addEventListener("click", closeModal);
+    $("modalOverlay").addEventListener("click", e=>{
+      if(e.target === e.currentTarget) closeModal();
+    });
+    $("modalConfirm").addEventListener("click", ()=>{
+      closeModal();
+      submitted = true;
+      const count = state.cart.length;
+      state.cart = [];
+      refresh();
+      $("statusText").textContent = "Отправлен";
+      $("statusDot").style.background = "#22c55e";
+      openSuccess();
+    });
+
+    $("successClose").addEventListener("click", closeSuccess);
+    $("successOverlay").addEventListener("click", e=>{
+      if(e.target === e.currentTarget) closeSuccess();
+    });
+
+    // ===== INIT =====
+    renderLimits();
+    updateStatus();
+    updateSlots();
+    refresh();
+  </script>
+</body>
+</html>
