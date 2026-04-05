@@ -1,0 +1,802 @@
+<!doctype <htmlhtml>
+ <headlang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Журнал событий идентификации СКУД</title>
+  <style>
+    :root{
+      --t-yellow:#FFD21E;
+      --t-yellow-3:#FFF3C4;
+      --t-black:#111113;
+      --t-text:#1b1b1f;
+      --t-muted:#6b6f76;
+      --t-border:#e7e7ea;
+      --t-bg:#ffffff;
+      --t-soft:#f7f7f9;
+      --t-success:#18a957;
+      --t-danger:#e54848;
+      --t-shadow: 0 10px 30px rgba(17,17,19,.08);
+      --radius:16px;
+      --focus: 0 0 0 3px rgba(255,210,30,.45);
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--t-text);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, var(--t-yellow-3) 0%, rgba(255,243,196,0) 60%),
+        radial-gradient(900px 500px at 110% 0%, rgba(255,210,30,.18) 0%, rgba(255,210,30,0) 62%),
+        var(--t-bg);
+    }
+    button, input, select{ font: inherit; }
+
+    .app{ min-height:100%; display:flex; flex-direction:column; }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:rgba(255,255,255,.85);
+      backdrop-filter:saturate(180%) blur(10px);
+      border-bottom:1px solid var(--t-border);
+    }
+    .topbar__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .brand{ display:flex; align-items:center; gap:10px; }
+    .logo{
+      width:36px;height:36px;
+      border-radius:12px;
+      background:linear-gradient(180deg, var(--t-yellow) 0%, #ffbf00 100%);
+      display:grid;
+      place-items:center;
+      color:var(--t-black);
+      font-weight:900;
+      letter-spacing:.02em;
+      box-shadow: 0 10px 22px rgba(255,210,30,.25);
+    }
+    .brand__text{ display:flex; flex-direction:column; line-height:1.15; }
+    .brand__title{ font-weight:800; letter-spacing:.01em; }
+    .brand__subtitle{ font-size:12px; color:var(--t-muted); margin-top:2px; }
+
+    .container{
+      max-width:1200px;
+      width:100%;
+      margin:0 auto;
+      padding:18px;
+      display:grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 1020px){
+      .container{ grid-template-columns:1fr; }
+    }
+
+    .card{
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--t-border);
+      border-radius:var(--radius);
+      box-shadow: var(--t-shadow);
+      min-width:0; /* critical for grid overflow */
+    }
+    .card__head{
+      padding:16px 16px 12px;
+      border-bottom:1px solid var(--t-border);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .card__title{ margin:0; font-size:16px; letter-spacing:.01em; font-weight:850; }
+    .card__hint{ margin:6px 0 0; font-size:12px; color:var(--t-muted); line-height:1.4; }
+    .card__body{ padding:14px 16px 16px; }
+
+    .form{ display:grid; gap:10px; }
+    .row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media (max-width: 520px){ .row{ grid-template-columns:1fr; } }
+    .field{ display:flex; flex-direction:column; gap:6px; }
+    .label{ font-size:12px; color:var(--t-muted); }
+    .control{
+      height:40px;
+      border-radius:12px;
+      border:1px solid var(--t-border);
+      background:#fff;
+      padding:0 12px;
+      outline:none;
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    .control:focus{ border-color: rgba(255,210,30,.9); box-shadow: var(--focus); }
+
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+    .btn{
+      height:40px;
+      padding:0 14px;
+      border-radius:12px;
+      border:1px solid var(--t-border);
+      background:#fff;
+      cursor:pointer;
+      font-weight:700;
+      transition: transform .06s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn:focus{ outline:none; box-shadow: var(--focus); border-color: rgba(255,210,30,.9); }
+
+    .btn--primary{
+      background:linear-gradient(180deg, var(--t-yellow) 0%, #ffbf00 100%);
+      border-color: rgba(17,17,19,.08);
+      color: var(--t-black);
+      box-shadow: 0 10px 22px rgba(255,210,30,.28);
+    }
+    .btn--ghost{ background: var(--t-soft); }
+
+    .summary{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+    @media (max-width: 520px){ .summary{ grid-template-columns:1fr; } }
+    .kpi{
+      border:1px solid var(--t-border);
+      background: linear-gradient(180deg, rgba(255,243,196,.55) 0%, rgba(247,247,249,.85) 50%, rgba(255,255,255,.95) 100%);
+      border-radius:14px;
+      padding:12px 12px 10px;
+    }
+    .kpi__label{ font-size:12px; color:var(--t-muted); }
+    .kpi__value{ margin-top:6px; font-size:20px; font-weight:900; letter-spacing:.01em; }
+    .kpi__note{ margin-top:4px; font-size:12px; color:var(--t-muted); }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      padding:12px 16px;
+      border-bottom:1px solid var(--t-border);
+      min-width:0;
+    }
+    .search{
+      flex:1 1 260px;
+      min-width:0;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .search .control{ width:100%; min-width:0; }
+    .toolbar__right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      height:40px;
+      padding:0 12px;
+      border-radius:999px;
+      border:1px solid var(--t-border);
+      background:#fff;
+      color:var(--t-muted);
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .dot{ width:10px;height:10px;border-radius:999px;background:var(--t-muted); }
+    .dot--success{ background:var(--t-success); }
+    .dot--danger{ background:var(--t-danger); }
+
+    /* Table fits container width; horizontal scroll inside if needed */
+    .table-wrap{
+      overflow:auto;
+      border-radius: 0 0 var(--radius) var(--radius);
+      max-height: 560px;
+      min-width:0;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      table-layout:auto; /* allow natural shrink */
+      min-width: 820px;  /* enables internal horizontal scroll instead of page overflow */
+    }
+    thead th{
+      text-align:left;
+      font-size:12px;
+      color:var(--t-muted);
+      font-weight:800;
+      padding:12px 16px;
+      background: linear-gradient(180deg, rgba(255,243,196,.6) 0%, rgba(255,255,255,.98) 100%);
+      border-bottom:1px solid var(--t-border);
+      position:sticky;
+      top:0;
+      z-index:2;
+      white-space:nowrap;
+    }
+    tbody td{
+      padding:12px 16px;
+      border-bottom:1px solid var(--t-border);
+      vertical-align:top;
+      font-size:14px;
+      max-width: 1px;
+    }
+    tbody tr:hover td{ background: rgba(255,243,196,.25); }
+
+    .mono{ font-family:var(--mono); font-size:12.5px; color:var(--t-text); }
+    .muted{ color:var(--t-muted); font-size:12px; }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--t-border);
+      background:#fff;
+      font-weight:800;
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .status--ok{ border-color: rgba(24,169,87,.25); background: rgba(24,169,87,.08); color: #0f6e38; }
+    .status--fail{ border-color: rgba(229,72,72,.25); background: rgba(229,72,72,.08); color: #a62c2c; }
+
+    .row-actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .linkbtn{
+      height:34px;
+      padding:0 10px;
+      border-radius:10px;
+      border:1px solid var(--t-border);
+      background:#fff;
+      cursor:pointer;
+      font-weight:800;
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .linkbtn:hover{ background: var(--t-soft); }
+
+    .empty{ padding:20px 16px; color:var(--t-muted); font-size:14px; display:none; }
+
+    /* Modal */
+    .modal-overlay{
+      position:fixed;
+      inset:0;
+      background: rgba(17,17,19,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:50;
+    }
+    .modal-overlay.is-open{ display:flex; }
+    .modal{
+      width:min(820px, 100%);
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 30px 80px rgba(17,17,19,.28);
+      overflow:hidden;
+    }
+    .modal__head{
+      padding:14px 16px;
+      border-bottom:1px solid var(--t-border);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(180deg, rgba(255,243,196,.7) 0%, rgba(255,255,255,.98) 100%);
+    }
+    .modal__title{ margin:0; font-size:15px; font-weight:900; }
+    .modal__sub{ margin:4px 0 0; font-size:12px; color:var(--t-muted); }
+    .modal__body{
+      padding:14px 16px 16px;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:12px;
+    }
+    @media (max-width: 860px){ .modal__body{ grid-template-columns:1fr; } }
+    .panel{
+      border:1px solid var(--t-border);
+      border-radius:16px;
+      background:#fff;
+      overflow:hidden;
+    }
+    .panel__head{
+      padding:12px 12px 10px;
+      border-bottom:1px solid var(--t-border);
+      background: var(--t-soft);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .panel__title{ font-weight:900; font-size:13px; color:var(--t-text); }
+    .panel__body{ padding:12px; display:grid; gap:10px; }
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap:8px 10px;
+      align-items:start;
+    }
+    .kv .k{ font-size:12px; color:var(--t-muted); }
+    .kv .v{ font-size:13px; color:var(--t-text); word-break:break-word; }
+    .modal__foot{
+      padding:12px 16px 16px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      border-top:1px solid var(--t-border);
+      background:#fff;
+    }
+
+    .toast{
+      position:fixed;
+      bottom:16px;
+      left:50%;
+      transform:translateX(-50%);
+      background: rgba(17,17,19,.92);
+      color:#fff;
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:13px;
+      display:none;
+      max-width:min(720px, calc(100% - 32px));
+      z-index:60;
+    }
+    .toast.is-show{ display:block; }
+  <body</style>
+</head>
+
+>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar__inner">
+        <div class="brand">
+          <div class="logo" aria-label="Логотип">Т</div>
+          <div class="brand__text">
+            <div class="brand__title">Корпоративная столовая</div>
+            <div class="brand__subtitle">Журнал событий идентификации</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card" aria-label="Панель фильтров">
+        <div class="card__head">
+          <div>
+            <h2 class="card__title">Фильтры</h2>
+            <p class="card__hint">Отбор событий по периоду, результату и терминалу.</p>
+          </div>
+        </div>
+        <div class="card__body">
+          <form class="form" id="filtersForm">
+            <div class="row">
+              <div class="field">
+                <div class="label">Дата (с)</div>
+                <input class="control" type="date" id="dateFrom" />
+              </div>
+              <div class="field">
+                <div class="label">Дата (по)</div>
+                <input class="control" type="date" id="dateTo" />
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="label">Результат</div>
+              <select class="control" id="result">
+                <option value="all">Все</option>
+                <option value="ok">Успешно</option>
+                <option value="fail">Отказ</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <div class="label">Терминал</div>
+              <select class="control" id="terminal">
+                <option value="all">Все</option>
+              </select>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn--primary" type="submit">Применить</button>
+              <button class="btn btn--ghost" type="button" id="resetBtn">Сбросить</button>
+            </div>
+
+            <div class="summary" aria-label="Сводные показатели">
+              <div class="kpi">
+                <div class="kpi__label">События</div>
+                <div class="kpi__value" id="kpiTotal">0</div>
+                <div class="kpi__note">в выборке</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi__label">Успешно</div>
+                <div class="kpi__value" id="kpiOk">0</div>
+                <div class="kpi__note">идентификаций</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi__label">Отказы</div>
+                <div class="kpi__value" id="kpiFail">0</div>
+                <div class="kpi__note">с указанием причины</div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Журнал событий">
+        <div class="card__head">
+          <div>
+            <h2 class="card__title">Журнал событий</h2>
+            <p class="card__hint">События предъявления бейджа на раздаче. Из записи можно перейти к связанному заказу (если определен системой).</p>
+          </div>
+        </div>
+
+        <div class="toolbar" role="region" aria-label="Панель поиска и статусов">
+          <div class="search">
+            <input class="control" id="search" placeholder="Поиск по терминалу, причине отказа, идентификатору события" />
+          </div>
+          <div class="toolbar__right">
+            <div class="pill" title="Фильтр по результату">
+              <span class="dot" id="legendDot"></span>
+              <span id="legendText">Показаны: все</span>
+            </div>
+            <button class="btn" type="button" id="refreshBtn">Обновить</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table aria-label="Таблица событий идентификации">
+            <thead>
+              <tr>
+                <th style="min-width:190px;">Время</th>
+                <th style="min-width:150px;">Результат</th>
+                <th style="min-width:240px;">Терминал</th>
+                <th style="min-width:360px;">Причина отказа</th>
+                <th style="min-width:170px; text-align:right;">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div class="empty" id="emptyState">Нет событий по заданным условиям.</div>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Просмотр события">
+      <div class="modal">
+        <div class="modal__head">
+          <div>
+            <h3 class="modal__title">Карточка события</h3>
+            <div class="modal__sub" id="modalSub">—</div>
+          </div>
+          <button class="btn" type="button" id="closeModalBtn">Закрыть</button>
+        </div>
+
+        <div class="modal__body">
+          <div class="panel">
+            <div class="panel__head">
+              <div class="panel__title">Параметры идентификации</div>
+              <span class="status" id="modalStatus">—</span>
+            </div>
+            <div class="panel__body">
+              <div class="kv">
+                <div class="k">Идентификатор события</div>
+                <div class="v mono" id="mId">—</div>
+
+                <div class="k">Время</div>
+                <div class="v" id="mTime">—</div>
+
+                <div class="k">Терминал</div>
+                <div class="v" id="mTerminal">—</div>
+
+                <div class="k">Причина отказа</div>
+                <div class="v" id="mReason">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div class="panel__title">Связанные данные</div>
+              <span class="muted">если определены системой</span>
+            </div>
+            <div class="panel__body">
+              <div class="kv">
+                <div class="k">Идентификатор заказа</div>
+                <div class="v mono" id="mOrderId">—</div>
+              </div>
+              <button class="btn btn--ghost" type="button" id="openOrderBtn" style="width:100%;">Открыть заказ</button>
+              <div class="muted" id="orderHint">Переход доступен только при наличии связанного заказа.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal__foot">
+          <button class="btn" type="button" id="copyBtn">Копировать данные</button>
+          <button class="btn btn--primary" type="button" id="closeModalBtn2">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script>
+    const events = [
+      { id: 100021, время: "2026-03-14T12:31:18", успех: true,  терминал: "Раздача-1", причина: "", заказId: 501238 },
+      { id: 100022, время: "2026-03-14T12:31:44", успех: true,  терминал: "Раздача-1", причина: "", заказId: 501239 },
+      { id: 100023, время: "2026-03-14T12:32:10", успех: false, терминал: "Раздача-2", причина: "Бейдж не распознан", заказId: null },
+      { id: 100024, время: "2026-03-14T12:33:02", успех: true,  терминал: "Раздача-2", причина: "", заказId: 501241 },
+      { id: 100025, время: "2026-03-14T12:35:19", успех: false, терминал: "Раздача-1", причина: "Доступ запрещен", заказId: null },
+      { id: 100026, время: "2026-03-14T12:37:08", успех: true,  терминал: "Раздача-3", причина: "", заказId: 501246 },
+      { id: 100027, время: "2026-03-14T12:40:55", успех: false, терминал: "Раздача-3", причина: "Истекло время ожидания", заказId: null },
+      { id: 100028, время: "2026-03-14T12:41:12", успех: true,  терминал: "Раздача-1", причина: "", заказId: 501251 },
+      { id: 100029, время: "2026-03-14T12:42:07", успех: true,  терминал: "Раздача-2", причина: "", заказId: 501255 },
+      { id: 100030, время: "2026-03-14T12:43:26", успех: false, терминал: "Раздача-2", причина: "Ошибка чтения", заказId: null }
+    ];
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+
+    const state = { dateFrom:"", dateTo:"", result:"all", terminal:"all", search:"" };
+
+    function fmtDateTime(iso){
+      const d = new Date(iso);
+      const pad = (n)=> String(n).padStart(2,"0");
+      return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function inDateRange(iso, from, to){
+      const t = new Date(iso).getTime();
+      if(from){
+        const f = new Date(from + "T00:00:00").getTime();
+        if(t < f) return false;
+      }
+      if(to){
+        const tt = new Date(to + "T23:59:59").getTime();
+        if(t > tt) return false;
+      }
+      return true;
+    }
+
+    function normalize(s){ return (s ?? "").toString().trim().toLowerCase(); }
+
+    function filterEvents(){
+      return events.filter(e => {
+        if(!inDateRange(e.время, state.dateFrom, state.dateTo)) return false;
+        if(state.result === "ok" && !e.успех) return false;
+        if(state.result === "fail" && e.успех) return false;
+        if(state.terminal !== "all" && e.терминал !== state.terminal) return false;
+
+        const q = normalize(state.search);
+        if(q){
+          const hay = [e.id, e.терминал, e.причина, e.заказId ?? ""].map(normalize).join(" ");
+          if(!hay.includes(q)) return false;
+        }
+        return true;
+      }).sort((a,b)=> new Date(b.время) - new Date(a.время));
+    }
+
+    function setLegend(){
+      const dot = $("#legendDot");
+      const text = $("#legendText");
+      if(state.result === "ok"){
+        dot.className = "dot dot--success";
+        text.textContent = "Показаны: успешные";
+      }else if(state.result === "fail"){
+        dot.className = "dot dot--danger";
+        text.textContent = "Показаны: отказы";
+      }else{
+        dot.className = "dot";
+        text.textContent = "Показаны: все";
+      }
+    }
+
+    function render(){
+      setLegend();
+      const data = filterEvents();
+      const tbody = $("#tbody");
+      tbody.innerHTML = "";
+
+      const total = data.length;
+      const ok = data.filter(x=>x.успех).length;
+      const fail = total - ok;
+
+      $("#kpiTotal").textContent = total;
+      $("#kpiOk").textContent = ok;
+      $("#kpiFail").textContent = fail;
+
+      $("#emptyState").style.display = total ? "none" : "block";
+
+      for(const e of data){
+        const tr = document.createElement("tr");
+
+        const tdTime = document.createElement("td");
+        tdTime.innerHTML = `<div>${fmtDateTime(e.время)}</div><div class="muted">ID: <span class="mono">${e.id}</span></div>`;
+        tr.appendChild(tdTime);
+
+        const tdRes = document.createElement("td");
+        tdRes.innerHTML = e.успех
+          ? `<span class="status status--ok"><span class="dot dot--success"></span>Успешно</span>`
+          : `<span class="status status--fail"><span class="dot dot--danger"></span>Отказ</span>`;
+        tr.appendChild(tdRes);
+
+        const tdTerm = document.createElement("td");
+        tdTerm.textContent = e.терминал;
+        tr.appendChild(tdTerm);
+
+        const tdReason = document.createElement("td");
+        tdReason.innerHTML = e.успех ? `<span class="muted">—</span>` : (e.причина || "—");
+        tr.appendChild(tdReason);
+
+        const tdAct = document.createElement("td");
+        tdAct.style.textAlign = "right";
+        const actions = document.createElement("div");
+        actions.className = "row-actions";
+
+        const viewBtn = document.createElement("button");
+        viewBtn.className = "linkbtn";
+        viewBtn.type = "button";
+        viewBtn.textContent = "Просмотр";
+        viewBtn.addEventListener("click", ()=> openModal(e));
+        actions.appendChild(viewBtn);
+
+        const orderBtn = document.createElement("button");
+        orderBtn.className = "linkbtn";
+        orderBtn.type = "button";
+        orderBtn.textContent = "К заказу";
+        orderBtn.disabled = !e.заказId;
+        orderBtn.style.opacity = e.заказId ? "1" : ".5";
+        orderBtn.style.cursor = e.заказId ? "pointer" : "not-allowed";
+        orderBtn.addEventListener("click", ()=> {
+          if(!e.заказId) return;
+          showToast(`Переход к заказу: ${e.заказId}`);
+        });
+        actions.appendChild(orderBtn);
+
+        tdAct.appendChild(actions);
+        tr.appendChild(tdAct);
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    function initTerminals(){
+      const terminals = Array.from(new Set(events.map(e=>e.терминал))).sort();
+      const sel = $("#terminal");
+      for(const t of terminals){
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        sel.appendChild(opt);
+      }
+    }
+
+    function initDates(){
+      const times = events.map(e=> new Date(e.время).getTime()).sort((a,b)=>a-b);
+      if(!times.length) return;
+      const min = new Date(times[0]);
+      const max = new Date(times[times.length-1]);
+      const toISODate = (d)=> {
+        const pad = (n)=> String(n).padStart(2,"0");
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      };
+      const df = toISODate(min);
+      const dt = toISODate(max);
+      $("#dateFrom").value = df;
+      $("#dateTo").value = dt;
+      state.dateFrom = df;
+      state.dateTo = dt;
+    }
+
+    function openModal(e){
+      $("#modalSub").textContent = `ID: ${e.id}`;
+      $("#mId").textContent = e.id;
+      $("#mTime").textContent = fmtDateTime(e.время);
+      $("#mTerminal").textContent = e.терминал;
+      $("#mReason").textContent = e.успех ? "—" : (e.причина || "—");
+      $("#mOrderId").textContent = e.заказId ? e.заказId : "—";
+
+      const st = $("#modalStatus");
+      if(e.успех){
+        st.className = "status status--ok";
+        st.innerHTML = `<span class="dot dot--success"></span>Успешно`;
+      }else{
+        st.className = "status status--fail";
+        st.innerHTML = `<span class="dot dot--danger"></span>Отказ`;
+      }
+
+      const openOrderBtn = $("#openOrderBtn");
+      const hint = $("#orderHint");
+      if(e.заказId){
+        openOrderBtn.disabled = false;
+        openOrderBtn.style.opacity = "1";
+        openOrderBtn.style.cursor = "pointer";
+        hint.textContent = "Переход доступен.";
+        openOrderBtn.onclick = ()=> showToast(`Переход к заказу: ${e.заказId}`);
+      }else{
+        openOrderBtn.disabled = true;
+        openOrderBtn.style.opacity = ".6";
+        openOrderBtn.style.cursor = "not-allowed";
+        hint.textContent = "Связанный заказ не определен.";
+        openOrderBtn.onclick = null;
+      }
+
+      $("#copyBtn").onclick = async ()=> {
+        const lines = [
+          `ID события: ${e.id}`,
+          `Время: ${fmtDateTime(e.время)}`,
+          `Результат: ${e.успех ? "успешно" : "отказ"}`,
+          `Терминал: ${e.терминал}`,
+          `Причина отказа: ${e.успех ? "—" : (e.причина || "—")}`,
+          `ID заказа: ${e.заказId ? e.заказId : "—"}`
+        ].join("\n");
+
+        try{
+          await navigator.clipboard.writeText(lines);
+          showToast("Скопировано в буфер обмена");
+        }catch{
+          showToast("Не удалось скопировать");
+        }
+      };
+
+      $("#modalOverlay").classList.add("is-open");
+      document.addEventListener("keydown", escCloseOnce);
+    }
+
+    function closeModal(){
+      $("#modalOverlay").classList.remove("is-open");
+      document.removeEventListener("keydown", escCloseOnce);
+    }
+    function escCloseOnce(e){ if(e.key === "Escape") closeModal(); }
+
+    $("#closeModalBtn").addEventListener("click", closeModal);
+    $("#closeModalBtn2").addEventListener("click", closeModal);
+    $("#modalOverlay").addEventListener("click", (e)=>{ if(e.target === $("#modalOverlay")) closeModal(); });
+
+    let toastTimer = null;
+    function showToast(text){
+      const t = $("#toast");
+      t.textContent = text;
+      t.classList.add("is-show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=> t.classList.remove("is-show"), 1800);
+    }
+
+    $("#filtersForm").addEventListener("submit", (e)=>{
+      e.preventDefault();
+      state.dateFrom = $("#dateFrom").value;
+      state.dateTo = $("#dateTo").value;
+      state.result = $("#result").value;
+      state.terminal = $("#terminal").value;
+      render();
+    });
+
+    $("#resetBtn").addEventListener("click", ()=>{
+      $("#result").value = "all";
+      $("#terminal").value = "all";
+      $("#search").value = "";
+      state.result = "all";
+      state.terminal = "all";
+      state.search = "";
+      initDates();
+      render();
+    });
+
+    $("#search").addEventListener("input", (e)=>{ state.search = e.target.value; render(); });
+    $("#refreshBtn").addEventListener("click", ()=>{ showToast("Данные обновлены"); render(); });
+
+    initTerminals();
+    initDates();
+    render();
+  </script>
+</body>
+</html>

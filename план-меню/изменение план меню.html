@@ -1,0 +1,663 @@
+<!doctype <htmlhtml>
+ <headlang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>План-меню на следующий месяц</title>
+  <style>
+    :root{
+      --t-yellow:#FFDD2D;
+      --t-yellow-2:#FFE769;
+      --t-black:#111111;
+      --t-gray-2:#3a3a3a;
+      --t-line:#E7E7E7;
+      --t-bg:#FFFFFF;
+      --t-bg-2:#FAFAFA;
+      --t-bg-3:#F4F4F4;
+      --t-text:#111111;
+      --t-muted:#6B6B6B;
+      --t-danger:#C62828;
+      --t-ok:#0B7A3B;
+      --shadow: 0 10px 25px rgba(17,17,17,.08);
+      --radius:16px;
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--t-text);
+      background:
+        radial-gradient(800px 300px at 20% 0%, rgba(255,221,45,.25), rgba(255,221,45,0) 60%),
+        radial-gradient(900px 350px at 80% 10%, rgba(255,231,105,.22), rgba(255,231,105,0) 55%),
+        var(--t-bg);
+    }
+    button,input,select{font:inherit}
+    .app{min-height:100%;display:flex;flex-direction:column}
+
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      background:rgba(255,255,255,.9);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--t-line);
+    }
+    .topbar__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .brand{display:flex;align-items:center;gap:10px;min-width:220px}
+    .logo{
+      width:36px;height:36px;border-radius:12px;
+      background:linear-gradient(180deg, var(--t-yellow), var(--t-yellow-2));
+      color:var(--t-black);
+      display:grid;place-items:center;
+      font-weight:900;letter-spacing:.5px;
+      box-shadow: 0 10px 18px rgba(255,221,45,.35);
+      border:1px solid rgba(17,17,17,.06);
+      user-select:none;
+    }
+    .brand__title{display:flex;flex-direction:column;line-height:1.1}
+    .brand__title b{font-size:14px}
+    .brand__title span{font-size:12px;color:var(--t-muted)}
+    .topbar__right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius:999px;
+      background:var(--t-bg-2);border:1px solid var(--t-line);
+      font-size:12px;color:var(--t-gray-2);white-space:nowrap;
+    }
+    .chip i{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--t-yellow);
+      display:inline-block;
+      box-shadow:0 0 0 4px rgba(255,221,45,.25);
+    }
+
+    .container{
+      max-width:1200px;margin:18px auto 28px;padding:0 16px;width:100%;
+    }
+
+    .card{
+      background:var(--t-bg);
+      border:1px solid var(--t-line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card__head{
+      padding:14px 14px 12px;
+      border-bottom:1px solid var(--t-line);
+      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+      flex-wrap:wrap;
+    }
+    .card__title{display:flex;flex-direction:column;gap:4px;min-width:280px}
+    .card__title h1,.card__title h2{margin:0;font-size:16px;letter-spacing:.2px}
+    .card__title p{margin:0;font-size:12px;color:var(--t-muted);line-height:1.35}
+    .card__body{padding:14px}
+    .card__foot{
+      padding:12px 14px 14px;
+      border-top:1px solid var(--t-line);
+      background:linear-gradient(180deg, var(--t-bg), var(--t-bg-2));
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;
+    }
+
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+    .field{display:flex;flex-direction:column;gap:6px;min-width:160px}
+    .field label{font-size:11px;color:var(--t-muted)}
+    .input,.select{
+      height:40px;padding:0 12px;border-radius:12px;
+      border:1px solid var(--t-line);
+      background:var(--t-bg);
+      outline:none;
+      transition:.15s border-color,.15s box-shadow;
+    }
+    .input:focus,.select:focus{
+      border-color: rgba(255,221,45,.9);
+      box-shadow: 0 0 0 4px rgba(255,221,45,.25);
+    }
+    .btn{
+      height:40px;padding:0 12px;border-radius:12px;
+      border:1px solid var(--t-line);
+      background:var(--t-bg);
+      color:var(--t-text);
+      cursor:pointer;
+      display:inline-flex;align-items:center;gap:8px;
+      transition:.15s transform,.15s box-shadow,.15s background;
+      user-select:none;white-space:nowrap;
+    }
+    .btn:hover{background:var(--t-bg-2)}
+    .btn:active{transform:translateY(1px)}
+    .btn--primary{
+      border-color: rgba(17,17,17,.08);
+      background: linear-gradient(180deg, var(--t-yellow), var(--t-yellow-2));
+      box-shadow: 0 12px 18px rgba(255,221,45,.25);
+    }
+    .btn--primary:hover{filter:saturate(1.05)}
+    .btn--danger{
+      border-color: rgba(198,40,40,.2);
+      background: rgba(198,40,40,.06);
+      color: var(--t-danger);
+    }
+
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width: 780px){ .grid2{grid-template-columns:1fr} }
+
+    .divider{height:1px;background:var(--t-line);margin:12px 0}
+    .hint{font-size:12px;color:var(--t-muted);line-height:1.35}
+
+    .table-wrap{
+      overflow:auto;border-radius:14px;border:1px solid var(--t-line);background:var(--t-bg);
+      margin-top:12px;
+    }
+    table{width:100%;border-collapse:separate;border-spacing:0;min-width:760px}
+    thead th{
+      position:sticky; top:0; z-index:1;
+      background: var(--t-bg-3);
+      text-align:left;font-size:12px;color:var(--t-gray-2);
+      padding:10px 10px;border-bottom:1px solid var(--t-line);white-space:nowrap;
+    }
+    tbody td{
+      padding:10px 10px;border-bottom:1px solid var(--t-line);vertical-align:top;background:var(--t-bg);
+    }
+    tbody tr:hover td{background:#FFFDF2}
+    tbody tr:last-child td{border-bottom:0}
+
+    .cell-row-actions{display:flex;gap:8px;justify-content:flex-end}
+    .mini{height:34px;padding:0 10px;border-radius:10px;font-size:12px}
+
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      font-size:12px;border:1px solid var(--t-line);
+      background:var(--t-bg-2);color:var(--t-gray-2);white-space:nowrap;
+    }
+    .tag i{width:8px;height:8px;border-radius:50%;background:var(--t-yellow);display:inline-block}
+
+    .status{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:14px;
+      border:1px solid var(--t-line);
+      background:var(--t-bg-2);
+      margin-top:12px;
+      font-size:12px;color:var(--t-gray-2);
+    }
+    .status .lamp{
+      width:10px;height:10px;border-radius:50%;
+      background: var(--t-yellow);
+      box-shadow:0 0 0 4px rgba(255,221,45,.25);
+      flex:0 0 auto;
+    }
+
+    .toast{
+      position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
+      background: rgba(17,17,17,.92);color:#fff;
+      padding:10px 12px;border-radius:12px;font-size:12px;
+      opacity:0;pointer-events:none;
+      transition:.2s opacity,.2s transform;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(-2px)}
+  <body</style>
+</head>
+
+>
+<div class="app">
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <div class="logo" aria-label="Логотип">Т</div>
+        <div class="brand__title">
+          <b>Корпоративная столовая</b>
+          <span>Планирование на следующий месяц</span>
+        </div>
+      </div>
+
+      <div class="topbar__right">
+        <div class="chip" title="Роль текущего пользователя"><i></i> Повар‑технолог</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="card__head">
+        <div class="card__title">
+          <h1>План‑меню</h1>
+          <p>Сформируйте состав блюд по датам и времени приема пищи. После заполнения выполните автоматический расчет плановых порций.</p>
+        </div>
+
+        <div class="toolbar">
+          <div class="field" style="min-width:220px">
+            <label>Период</label>
+            <select class="select" id="periodSelect" aria-label="Период"></select>
+          </div>
+          <button class="btn" id="btnSaveDraft" type="button">Промежуточное сохранение</button>
+          <button class="btn btn--danger" id="btnClear" type="button">Очистить</button>
+        </div>
+      </div>
+
+      <div class="card__body">
+        <div class="card">
+          <div class="card__head" style="border-bottom:1px solid var(--t-line); border-radius:0; box-shadow:none; border-left:0;border-right:0;border-top:0;">
+            <div class="card__title">
+              <h2>Ручное формирование</h2>
+              <p>Добавление строк план‑меню с выбором даты, времени приема пищи, категории и блюда.</p>
+            </div>
+          </div>
+
+          <div class="card__body">
+            <div class="grid2">
+              <div class="field">
+                <label>Дата</label>
+                <input class="input" id="fDate" type="date" />
+              </div>
+              <div class="field">
+                <label>Время приема пищи</label>
+                <select class="select" id="fSlot"></select>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="grid2">
+              <div class="field">
+                <label>Категория</label>
+                <select class="select" id="fCategory"></select>
+              </div>
+              <div class="field">
+                <label>Блюдо</label>
+                <select class="select" id="fDish"></select>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+              <button class="btn btn--primary" id="btnAddFromForm" type="button">Добавить в план‑меню</button>
+            </div>
+
+            <div class="hint" style="margin-top:10px">
+              Плановые порции будут рассчитаны системой автоматически после заполнения состава блюд.
+            </div>
+
+            <div class="status" aria-live="polite">
+              <span class="lamp" id="lamp"></span>
+              <span id="statusText">Заполните блюда и выполните расчет плановых порций.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap" role="region" aria-label="Таблица план-меню">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:130px">Дата</th>
+                <th style="width:180px">Время приема пищи</th>
+                <th style="width:180px">Категория</th>
+                <th>Блюдо</th>
+                <th style="width:150px">План порций, шт</th>
+                <th style="width:160px; text-align:right">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="planBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card__foot">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <span class="tag"><i></i><span>Статус: <b id="docStatus">Проект</b></span></span>
+          <span class="tag"><i></i><span>Создано: <b id="createdAt">—</b></span></span>
+          <span class="tag"><i></i><span>Автор: <b>Повар‑технолог</b></span></span>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn--primary" id="btnAuto" type="button">Автоматически рассчитать порции</button>
+          <button class="btn" id="btnApprove" type="button">Утвердить</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+  const slots = [
+    { id: 1, name: "Завтрак", start: "08:30", end: "10:30" },
+    { id: 2, name: "Обед", start: "12:30", end: "17:00" }
+  ];
+
+  const categories = [
+    { id: 1, name: "Суп", sort: 10 },
+    { id: 2, name: "Салат", sort: 20 },
+    { id: 3, name: "Горячее", sort: 30 },
+    { id: 4, name: "Гарнир", sort: 40 },
+    { id: 5, name: "Напиток", sort: 50 }
+  ];
+
+  const dishes = [
+    { id: 101, name: "Борщ", categoryId: 1, kcal: 210 },
+    { id: 102, name: "Куриный суп", categoryId: 1, kcal: 180 },
+    { id: 201, name: "Салат овощной", categoryId: 2, kcal: 120 },
+    { id: 202, name: "Салат «Цезарь»", categoryId: 2, kcal: 260 },
+    { id: 301, name: "Котлета куриная", categoryId: 3, kcal: 320 },
+    { id: 302, name: "Говядина тушеная", categoryId: 3, kcal: 350 },
+    { id: 401, name: "Гречка", categoryId: 4, kcal: 210 },
+    { id: 402, name: "Пюре картофельное", categoryId: 4, kcal: 240 },
+    { id: 501, name: "Компот", categoryId: 5, kcal: 90 },
+    { id: 502, name: "Чай", categoryId: 5, kcal: 5 }
+  ];
+
+  let planItems = [];
+  let docStatus = "Проект";
+  const createdAt = new Date();
+
+  const $ = (sel) => document.querySelector(sel);
+  const planBody = $("#planBody");
+  const toastEl = $("#toast");
+
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    window.clearTimeout(toastEl._t);
+    toastEl._t = window.setTimeout(() => toastEl.classList.remove("show"), 2200);
+  }
+
+  function fmtDateISO(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function fmtDateRu(iso){
+    if(!iso) return "—";
+    const [y,m,d] = iso.split("-");
+    return `${d}.${m}.${y}`;
+  }
+
+  function fmtTimeRange(slotId){
+    const s = slots.find(x=>x.id===slotId);
+    return s ? `${s.name} (${s.start}–${s.end})` : "—";
+  }
+
+  function populateSelectors(){
+    const period = $("#periodSelect");
+    const now = new Date();
+    const periods = [];
+    for(let i=0;i<6;i++){
+      const d = new Date(now.getFullYear(), now.getMonth()+1+i, 1);
+      const y = d.getFullYear();
+      const m = d.getMonth()+1;
+      periods.push({ y, m });
+    }
+    period.innerHTML = periods.map(p=>{
+      const mm = String(p.m).padStart(2,"0");
+      return `<option value="${p.y}-${mm}">${mm}.${p.y}</option>`;
+    }).join("");
+    period.value = `${periods[0].y}-${String(periods[0].m).padStart(2,"0")}`;
+
+    setFormDateToPeriodStart();
+
+    const slotSel = $("#fSlot");
+    slotSel.innerHTML = slots.map(s=>`<option value="${s.id}">${s.name} (${s.start}–${s.end})</option>`).join("");
+
+    const catSel = $("#fCategory");
+    const cats = [...categories].sort((a,b)=>a.sort-b.sort);
+    catSel.innerHTML = cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
+
+    updateDishSelector();
+  }
+
+  function updateDishSelector(){
+    const catId = Number($("#fCategory").value);
+    const dishSel = $("#fDish");
+    const filtered = dishes.filter(d=>d.categoryId===catId);
+    dishSel.innerHTML = filtered.map(d=>`<option value="${d.id}">${d.name}</option>`).join("");
+  }
+
+  function setFormDateToPeriodStart(){
+    const [y,mm] = $("#periodSelect").value.split("-").map(Number);
+    $("#fDate").value = fmtDateISO(new Date(y, mm-1, 1));
+  }
+
+  function clampPlanPortions(v){
+    if(v === "" || v === null || v === undefined) return null;
+    const n = Number(v);
+    if(!Number.isFinite(n) || n < 0) return null;
+    return Math.floor(n);
+  }
+
+  function addPlanItem({dateISO, slotId, categoryId, dishId}){
+    const exists = planItems.some(x =>
+      x.dateISO === dateISO &&
+      x.slotId === slotId &&
+      x.dishId === dishId
+    );
+    if(exists){
+      toast("Такая строка уже есть.");
+      return;
+    }
+    planItems.push({
+      id: crypto.randomUUID(),
+      dateISO,
+      slotId,
+      categoryId,
+      dishId,
+      planPortions: null
+    });
+    docStatus = "Проект";
+    renderAll();
+  }
+
+  function removePlanItem(id){
+    planItems = planItems.filter(x=>x.id!==id);
+    docStatus = "Проект";
+    renderAll();
+  }
+
+  function updatePlanPortions(id, value){
+    const it = planItems.find(x=>x.id===id);
+    if(!it) return;
+    it.planPortions = clampPlanPortions(value);
+    docStatus = "Проект";
+    renderAll(false);
+  }
+
+  function renderTable(){
+    const sorted = [...planItems].sort((a,b)=>{
+      if(a.dateISO !== b.dateISO) return a.dateISO.localeCompare(b.dateISO);
+      if(a.slotId !== b.slotId) return a.slotId - b.slotId;
+      if(a.categoryId !== b.categoryId) return a.categoryId - b.categoryId;
+      return a.dishId - b.dishId;
+    });
+
+    planBody.innerHTML = sorted.map(item=>{
+      const cat = categories.find(c=>c.id===item.categoryId);
+      const dish = dishes.find(d=>d.id===item.dishId);
+      const plan = item.planPortions === null ? "" : String(item.planPortions);
+      return `
+        <tr>
+          <td>${fmtDateRu(item.dateISO)}</td>
+          <td>${fmtTimeRange(item.slotId)}</td>
+          <td>${cat ? cat.name : "—"}</td>
+          <td>${dish ? dish.name : "—"}</td>
+          <td>
+            <input class="input" style="height:34px; border-radius:10px; width:100%;"
+                   type="number" min="0" step="1"
+                   value="${plan}"
+                   placeholder="—"
+                   aria-label="План порций"
+                   data-id="${item.id}">
+          </td>
+          <td>
+            <div class="cell-row-actions">
+              <button class="btn mini btn--danger" type="button" data-remove="${item.id}">Удалить</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    planBody.querySelectorAll('input[data-id]').forEach(inp=>{
+      inp.addEventListener("input", (e)=> updatePlanPortions(e.target.dataset.id, e.target.value));
+    });
+    planBody.querySelectorAll('button[data-remove]').forEach(btn=>{
+      btn.addEventListener("click", ()=> removePlanItem(btn.dataset.remove));
+    });
+  }
+
+  function renderMeta(){
+    $("#docStatus").textContent = docStatus;
+    $("#createdAt").textContent = createdAt.toLocaleString("ru-RU", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+
+    const lamp = $("#lamp");
+    const statusText = $("#statusText");
+
+    const items = planItems.length;
+    const planned = planItems.filter(x=>x.planPortions !== null).length;
+
+    if(docStatus === "Утверждено"){
+      lamp.style.background = getComputedStyle(document.documentElement).getPropertyValue("--t-ok");
+      lamp.style.boxShadow = "0 0 0 4px rgba(11,122,59,.18)";
+      statusText.textContent = "Документ утвержден. Изменения недоступны до возврата в проект.";
+    }else{
+      lamp.style.background = getComputedStyle(document.documentElement).getPropertyValue("--t-yellow");
+      lamp.style.boxShadow = "0 0 0 4px rgba(255,221,45,.25)";
+      if(items===0) statusText.textContent = "Черновик: добавьте строки с блюдами, затем рассчитайте плановые порции.";
+      else if(planned===0) statusText.textContent = "Черновик: строки добавлены, плановые порции не рассчитаны.";
+      else statusText.textContent = "Черновик: часть/все плановые порции заполнены. При необходимости выполните пересчет.";
+    }
+
+    const disabled = (docStatus === "Утверждено");
+    $("#btnClear").disabled = disabled;
+    $("#btnSaveDraft").disabled = disabled;
+    $("#btnAuto").disabled = disabled || planItems.length===0;
+    $("#btnAddFromForm").disabled = disabled;
+    $("#fDate").disabled = disabled;
+    $("#fSlot").disabled = disabled;
+    $("#fCategory").disabled = disabled;
+    $("#fDish").disabled = disabled;
+    $("#periodSelect").disabled = disabled;
+
+    planBody.querySelectorAll("input,button").forEach(el=> el.disabled = disabled);
+  }
+
+  function renderAll(rerenderTable=true){
+    if(rerenderTable) renderTable();
+    renderMeta();
+  }
+
+  function addFromForm(){
+    const dateISO = $("#fDate").value;
+    if(!dateISO){
+      toast("Выберите дату.");
+      return;
+    }
+    addPlanItem({
+      dateISO,
+      slotId: Number($("#fSlot").value),
+      categoryId: Number($("#fCategory").value),
+      dishId: Number($("#fDish").value)
+    });
+  }
+
+  function autoCalculatePortions(){
+    const baseBySlot = new Map([
+      [1, 180],
+      [2, 320]
+    ]);
+    const kByCategory = new Map([
+      [1, 0.55],
+      [2, 0.45],
+      [3, 0.65],
+      [4, 0.60],
+      [5, 0.50]
+    ]);
+
+    planItems = planItems.map(x=>{
+      if(x.planPortions !== null) return x;
+      const base = baseBySlot.get(x.slotId) ?? 200;
+      const k = kByCategory.get(x.categoryId) ?? 0.5;
+      const v = Math.max(0, Math.round(base * k));
+      return { ...x, planPortions: v };
+    });
+
+    docStatus = "Проект";
+    renderAll();
+    toast("Плановые порции рассчитаны.");
+  }
+
+  function approve(){
+    if(planItems.length === 0){
+      toast("Нет строк для утверждения.");
+      return;
+    }
+    const missing = planItems.filter(x=>x.planPortions === null).length;
+    if(missing > 0){
+      toast("Нельзя утвердить: есть строки без плановых порций.");
+      return;
+    }
+    docStatus = "Утверждено";
+    renderAll(false);
+    toast("План‑меню утверждено.");
+  }
+
+  function clearAll(){
+    planItems = [];
+    docStatus = "Проект";
+    renderAll();
+    toast("Данные очищены.");
+  }
+
+  function saveDraft(){
+    // промежуточное сохранение (эмуляция): фиксируем состояние, не вводя новых полей/данных
+    toast("Промежуточное сохранение выполнено.");
+  }
+
+  function seedDemo(){
+    const [y,mm] = $("#periodSelect").value.split("-").map(Number);
+    const d1 = fmtDateISO(new Date(y, mm-1, 1));
+    const d2 = fmtDateISO(new Date(y, mm-1, 2));
+    const d3 = fmtDateISO(new Date(y, mm-1, 3));
+
+    planItems = [
+      { id: crypto.randomUUID(), dateISO:d1, slotId:2, categoryId:1, dishId:101, planPortions:null },
+      { id: crypto.randomUUID(), dateISO:d1, slotId:2, categoryId:3, dishId:301, planPortions:null },
+      { id: crypto.randomUUID(), dateISO:d1, slotId:2, categoryId:4, dishId:401, planPortions:null },
+      { id: crypto.randomUUID(), dateISO:d1, slotId:2, categoryId:5, dishId:501, planPortions:null },
+
+      { id: crypto.randomUUID(), dateISO:d2, slotId:2, categoryId:1, dishId:102, planPortions:null },
+      { id: crypto.randomUUID(), dateISO:d2, slotId:2, categoryId:3, dishId:302, planPortions:null },
+      { id: crypto.randomUUID(), dateISO:d2, slotId:2, categoryId:4, dishId:402, planPortions:null },
+      { id: crypto.randomUUID(), dateISO:d2, slotId:2, categoryId:5, dishId:502, planPortions:null },
+
+      { id: crypto.randomUUID(), dateISO:d3, slotId:1, categoryId:2, dishId:201, planPortions:null },
+      { id: crypto.randomUUID(), dateISO:d3, slotId:1, categoryId:5, dishId:502, planPortions:null },
+    ];
+    docStatus = "Проект";
+    renderAll();
+  }
+
+  $("#fCategory").addEventListener("change", updateDishSelector);
+  $("#periodSelect").addEventListener("change", ()=>{
+    setFormDateToPeriodStart();
+    docStatus = "Проект";
+    renderAll(false);
+  });
+
+  $("#btnAddFromForm").addEventListener("click", addFromForm);
+  $("#btnAuto").addEventListener("click", autoCalculatePortions);
+  $("#btnApprove").addEventListener("click", approve);
+  $("#btnClear").addEventListener("click", clearAll);
+  $("#btnSaveDraft").addEventListener("click", saveDraft);
+
+  populateSelectors();
+  renderAll();
+  seedDemo();
+</script>
+</body>
+</html>

@@ -1,0 +1,1015 @@
+<!doctype <htmlhtml>
+ <headlang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Доступные порции — актуализация</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --surface:#fffdf5;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --shadow: 0 10px 24px rgba(17,24,39,.08);
+      --yellow:#ffdd2d;
+      --yellow-2:#ffd21a;
+      --yellow-3:#fff2b3;
+      --black:#111111;
+      --danger:#b42318;
+      --ok:#067647;
+      --warn:#b54708;
+      --focus: 0 0 0 4px rgba(255,221,45,.55);
+      --radius:16px;
+      --radius-sm:12px;
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(900px 420px at 80% -10%, rgba(255,221,45,.28), rgba(255,221,45,0) 60%),
+        radial-gradient(780px 420px at 10% -20%, rgba(255,221,45,.18), rgba(255,221,45,0) 65%),
+        linear-gradient(180deg, #ffffff 0%, #ffffff 50%, #fffdf6 100%);
+    }
+
+    a{color:inherit}
+    .app{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Top bar */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background: rgba(255,255,255,.86);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+    .topbar-inner{
+      max-width:1240px;
+      margin:0 auto;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:240px;
+    }
+    .logo{
+      width:38px;height:38px;
+      border-radius:12px;
+      background: linear-gradient(180deg, var(--yellow) 0%, var(--yellow-2) 100%);
+      display:grid;place-items:center;
+      color:var(--black);
+      font-weight:900;
+      font-size:20px;
+      letter-spacing:.3px;
+      box-shadow: 0 8px 18px rgba(255,221,45,.35);
+      user-select:none;
+    }
+    .brand-title{
+      display:flex;
+      flex-direction:column;
+      line-height:1.1;
+    }
+    .brand-title b{font-size:14px}
+    .brand-title span{font-size:12px;color:var(--muted)}
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    /* Layout */
+    .container{
+      width:100%;
+      max-width:1240px;
+      margin:0 auto;
+      padding:22px 18px 34px;
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .container{grid-template-columns:1fr}
+      .brand{min-width:auto}
+    }
+
+    .page-title{
+      margin:0;
+      font-size:22px;
+      letter-spacing:-.2px;
+    }
+    .subtitle{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* Cards */
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card-hd{
+      padding:14px 16px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(180deg, rgba(255,221,45,.22) 0%, rgba(255,221,45,0) 100%);
+    }
+    .card-hd .left{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .card-hd .ttl{
+      font-weight:800;
+      letter-spacing:-.2px;
+    }
+    .card-hd .meta{
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      background: #fff;
+      border:1px solid var(--border);
+      font-size:12px;
+      color:var(--muted);
+      user-select:none;
+      white-space:nowrap;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:99px;
+      background:var(--muted);
+    }
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.danger{background:var(--danger)}
+
+    .card-bd{padding:14px 16px}
+    .card-ft{
+      padding:14px 16px;
+      border-top:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,221,45,.12) 0%, rgba(255,221,45,0) 100%);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    /* Controls */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:10px;
+    }
+    .field{
+      grid-column: span 6;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .field.sm{grid-column: span 4;}
+    .field.lg{grid-column: span 8;}
+    .field.full{grid-column: 1 / -1;}
+    label{
+      font-size:12px;
+      color:var(--muted);
+    }
+    input, select, button{
+      font-family:inherit;
+    }
+    input[type="date"], input[type="number"], input[type="text"], select{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      background:#fff;
+      color:var(--text);
+      outline:none;
+      transition: box-shadow .15s ease, border-color .15s ease, transform .05s ease;
+    }
+    input:focus, select:focus{
+      border-color: rgba(17,24,39,.22);
+      box-shadow: var(--focus);
+    }
+    input[disabled], select[disabled]{
+      background:#f9fafb;
+      color:#9ca3af;
+    }
+
+    .btn{
+      border:1px solid transparent;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:800;
+      cursor:pointer;
+      transition: transform .05s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:40px;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn-primary{
+      background: linear-gradient(180deg, var(--yellow) 0%, var(--yellow-2) 100%);
+      color:var(--black);
+      box-shadow: 0 10px 18px rgba(255,221,45,.35);
+    }
+    .btn-primary:hover{box-shadow: 0 14px 26px rgba(255,221,45,.45)}
+    .btn-ghost{
+      background:#fff;
+      border-color: var(--border);
+      color:var(--text);
+    }
+    .btn-ghost:hover{border-color:#d1d5db}
+    .btn-danger{
+      background:#fff;
+      border-color: rgba(180,35,24,.22);
+      color: var(--danger);
+    }
+    .btn-danger:hover{border-color: rgba(180,35,24,.35)}
+    .btn:focus{outline:none; box-shadow: var(--focus)}
+    .btn[disabled]{opacity:.55; cursor:not-allowed}
+
+    /* Table */
+    .table-wrap{
+      border:1px solid var(--border);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      font-size:13px;
+    }
+    thead th{
+      text-align:left;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      padding:10px 12px;
+      background: #fffdf2;
+      border-bottom:1px solid var(--border);
+      white-space:nowrap;
+    }
+    tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      vertical-align:middle;
+    }
+    tbody tr:hover td{
+      background: rgba(255,221,45,.08);
+    }
+    tbody tr:last-child td{border-bottom:none}
+    .muted{color:var(--muted)}
+    .mono{font-family:var(--mono)}
+    .right{text-align:right}
+    .center{text-align:center}
+
+    .qty{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:8px;
+    }
+    .qty input[type="number"]{
+      max-width:120px;
+      text-align:right;
+      padding-right:10px;
+    }
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    /* Side panel summary */
+    .summary{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .kpi{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .kpi .box{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      background: #fff;
+    }
+    .kpi .box .n{
+      font-size:20px;
+      font-weight:900;
+      letter-spacing:-.4px;
+    }
+    .kpi .box .t{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+    .note{
+      border:1px dashed rgba(17,24,39,.18);
+      border-radius:14px;
+      padding:12px;
+      background: rgba(255,221,45,.12);
+      color:#111827;
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .toast{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      width:min(420px, calc(100% - 36px));
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:#fff;
+      box-shadow: var(--shadow);
+      padding:12px 12px;
+      display:none;
+      gap:10px;
+      align-items:flex-start;
+      z-index:999;
+    }
+    .toast.show{display:flex}
+    .toast .msg{
+      display:flex;flex-direction:column;gap:2px;
+      min-width:0;
+    }
+    .toast .msg b{font-size:13px}
+    .toast .msg span{font-size:12px;color:var(--muted)}
+    .toast .x{
+      margin-left:auto;
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      padding:6px 8px;
+      border-radius:10px;
+    }
+    .toast .x:focus{outline:none; box-shadow:var(--focus)}
+  <body</style>
+</head>
+
+>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="logo" aria-label="Логотип">Т</div>
+          <div class="brand-title">
+            <b>Корпоративная столовая</b>
+            <span>Доступные порции — актуализация</span>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button class="btn btn-ghost" id="btnReset" type="button">Сбросить изменения</button>
+          <button class="btn btn-primary" id="btnApply" type="button">Актуализировать</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Main -->
+      <section class="card">
+        <div class="card-hd">
+          <div class="left">
+            <div class="ttl">Загрузка и настройка порций на день</div>
+            <div class="meta">
+              <span class="pill" id="pillDay">
+                <span class="dot" id="dotDay"></span>
+                <span id="dayStateText">День не выбран</span>
+              </span>
+              <span class="pill">
+                <span class="dot ok"></span>
+                <span id="lastUpdateText">Последнее обновление: —</span>
+              </span>
+              <span class="pill">
+                <span class="dot ok"></span>
+                <span id="whoText">Пользователь: —</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-bd">
+          <div class="grid" style="margin-bottom:12px;">
+            <div class="field sm">
+              <label for="date">Дата</label>
+              <input id="date" type="date" />
+            </div>
+
+            <div class="field sm">
+              <label for="slot">Приём пищи</label>
+              <select id="slot">
+                <option value="" selected>Выберите</option>
+                <option value="breakfast">Завтрак</option>
+                <option value="lunch">Обед</option>
+              </select>
+            </div>
+
+            <div class="field lg">
+              <label for="search">Поиск по блюду</label>
+              <input id="search" type="text" placeholder="Начните вводить название" />
+            </div>
+
+            <div class="field sm">
+              <label for="lowThreshold">Порог “мало”</label>
+              <input id="lowThreshold" type="number" min="0" step="1" value="20" />
+            </div>
+
+            <div class="field sm">
+              <label>&nbsp;</label>
+              <button class="btn btn-ghost" id="btnLoad" type="button">Загрузить из план‑меню</button>
+            </div>
+
+            <div class="field sm">
+              <label>&nbsp;</label>
+              <button class="btn btn-danger" id="btnClear" type="button" disabled>Очистить таблицу</button>
+            </div>
+          </div>
+
+          <div class="table-wrap" aria-label="Таблица доступных порций">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:52px;" class="center">№</th>
+                  <th style="width:160px;">Категория</th>
+                  <th>Блюдо</th>
+                  <th style="width:140px;" class="right">План, порц.</th>
+                  <th style="width:170px;" class="right">Доступно, порц.</th>
+                  <th style="width:170px;">Состояние</th>
+                </tr>
+              </thead>
+              <tbody id="tbody">
+                <tr>
+                  <td class="center muted" colspan="6" style="padding:18px;">
+                    Выберите дату и приём пищи, затем загрузите данные
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card-ft">
+          <div class="pill" id="changesPill">
+            <span class="dot" id="changesDot"></span>
+            <span id="changesText">Изменений: 0</span>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+            <button class="btn btn-ghost" id="btnMarkAllPlan" type="button" disabled>Сделать доступно = план</button>
+            <button class="btn btn-primary" id="btnApplyBottom" type="button" disabled>Актуализировать</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Side -->
+      <aside class="summary">
+        <section class="card">
+          <div class="card-hd">
+            <div class="left">
+              <div class="ttl">Итоги</div>
+              <div class="meta">
+                <span class="pill"><span class="dot ok"></span><span>Табличная форма</span></span>
+                <span class="pill"><span class="dot ok"></span><span>Единицы: порции</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="card-bd">
+            <div class="kpi">
+              <div class="box">
+                <div class="n" id="kpiPositions">0</div>
+                <div class="t">Позиции меню</div>
+              </div>
+              <div class="box">
+                <div class="n" id="kpiPlanSum">0</div>
+                <div class="t">План, порц.</div>
+              </div>
+              <div class="box">
+                <div class="n" id="kpiAvailSum">0</div>
+                <div class="t">Доступно, порц.</div>
+              </div>
+              <div class="box">
+                <div class="n" id="kpiLow">0</div>
+                <div class="t">Мало / закончились</div>
+              </div>
+            </div>
+
+            <div class="note" style="margin-top:10px;" id="weekendNote">
+              Для выбранной даты обслуживание не выполняется.
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-hd">
+            <div class="left">
+              <div class="ttl">Проверки перед актуализацией</div>
+              <div class="meta">
+                <span class="pill"><span class="dot ok"></span><span>Контроль лимитов</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="card-bd" style="display:flex; flex-direction:column; gap:10px;">
+            <div class="pill" id="checkDate"><span class="dot danger"></span><span>Дата не выбрана</span></div>
+            <div class="pill" id="checkSlot"><span class="dot danger"></span><span>Приём пищи не выбран</span></div>
+            <div class="pill" id="checkData"><span class="dot warn"></span><span>Данные не загружены</span></div>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="dot ok" id="toastDot" style="margin-top:6px;"></span>
+      <div class="msg">
+        <b id="toastTitle">Готово</b>
+        <span id="toastText">Изменения сохранены</span>
+      </div>
+      <button class="x" id="toastClose" aria-label="Закрыть">✕</button>
+    </div>
+  </div>
+
+  <script>
+    // Данные для загрузки из план-меню (макет без заполнения полей пользователем)
+    // Состав соответствует: Категория блюда, Блюдо, Плановое количество порций
+    const PLAN_MENU = {
+      breakfast: [
+        { category: "Каша", dish: "Овсяная каша", plan: 180 },
+        { category: "Салат", dish: "Салат овощной", plan: 120 },
+        { category: "Горячее", dish: "Омлет", plan: 160 },
+        { category: "Напиток", dish: "Чай", plan: 260 },
+        { category: "Напиток", dish: "Кофе", plan: 190 }
+      ],
+      lunch: [
+        { category: "Суп", dish: "Куриный суп", plan: 220 },
+        { category: "Салат", dish: "Салат из капусты", plan: 190 },
+        { category: "Горячее", dish: "Куриное филе", plan: 210 },
+        { category: "Гарнир", dish: "Рис", plan: 240 },
+        { category: "Напиток", dish: "Компот", plan: 260 }
+      ]
+    };
+
+    const els = {
+      date: document.getElementById('date'),
+      slot: document.getElementById('slot'),
+      search: document.getElementById('search'),
+      lowThreshold: document.getElementById('lowThreshold'),
+      btnLoad: document.getElementById('btnLoad'),
+      btnApply: document.getElementById('btnApply'),
+      btnApplyBottom: document.getElementById('btnApplyBottom'),
+      btnReset: document.getElementById('btnReset'),
+      btnClear: document.getElementById('btnClear'),
+      btnMarkAllPlan: document.getElementById('btnMarkAllPlan'),
+      tbody: document.getElementById('tbody'),
+
+      pillDay: document.getElementById('pillDay'),
+      dotDay: document.getElementById('dotDay'),
+      dayStateText: document.getElementById('dayStateText'),
+      lastUpdateText: document.getElementById('lastUpdateText'),
+      whoText: document.getElementById('whoText'),
+
+      changesPill: document.getElementById('changesPill'),
+      changesDot: document.getElementById('changesDot'),
+      changesText: document.getElementById('changesText'),
+
+      kpiPositions: document.getElementById('kpiPositions'),
+      kpiPlanSum: document.getElementById('kpiPlanSum'),
+      kpiAvailSum: document.getElementById('kpiAvailSum'),
+      kpiLow: document.getElementById('kpiLow'),
+      weekendNote: document.getElementById('weekendNote'),
+
+      checkDate: document.getElementById('checkDate'),
+      checkSlot: document.getElementById('checkSlot'),
+      checkData: document.getElementById('checkData'),
+
+      toast: document.getElementById('toast'),
+      toastTitle: document.getElementById('toastTitle'),
+      toastText: document.getElementById('toastText'),
+      toastDot: document.getElementById('toastDot'),
+      toastClose: document.getElementById('toastClose'),
+    };
+
+    let state = {
+      rows: [],
+      originalAvail: new Map(),
+      loaded: false,
+      lastUpdate: null,
+      who: "Сотрудник раздачи",
+      changes: 0
+    };
+
+    function fmtDate(d){
+      const dd = String(d.getDate()).padStart(2,'0');
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const yy = d.getFullYear();
+      return `${dd}.${mm}.${yy}`;
+    }
+
+    function fmtTime(d){
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mi = String(d.getMinutes()).padStart(2,'0');
+      return `${hh}:${mi}`;
+    }
+
+    function isWeekend(dateStr){
+      if(!dateStr) return false;
+      const d = new Date(dateStr + 'T00:00:00');
+      const day = d.getDay(); // 0 Sun, 6 Sat
+      return day === 0 || day === 6;
+    }
+
+    function setPill(el, status, text){
+      const dot = el.querySelector('.dot');
+      dot.classList.remove('ok','warn','danger');
+      dot.classList.add(status);
+      el.querySelector('span:last-child').textContent = text;
+    }
+
+    function updateHeaderDayState(){
+      const dateStr = els.date.value;
+      const slotVal = els.slot.value;
+
+      if(!dateStr){
+        els.dotDay.className = 'dot';
+        els.dotDay.classList.add('danger');
+        els.dayStateText.textContent = 'День не выбран';
+        return;
+      }
+
+      if(isWeekend(dateStr)){
+        els.dotDay.className = 'dot';
+        els.dotDay.classList.add('danger');
+        els.dayStateText.textContent = `Выходной: ${fmtDate(new Date(dateStr+'T00:00:00'))}`;
+        return;
+      }
+
+      els.dotDay.className = 'dot';
+      els.dotDay.classList.add(slotVal ? 'ok' : 'warn');
+
+      const dText = fmtDate(new Date(dateStr+'T00:00:00'));
+      els.dayStateText.textContent = slotVal ? `${dText} • ${slotVal === 'breakfast' ? 'Завтрак' : 'Обед'}` : `${dText} • выберите приём пищи`;
+    }
+
+    function setCheck(el, ok, okText, badText){
+      const dot = el.querySelector('.dot');
+      dot.classList.remove('ok','warn','danger');
+      dot.classList.add(ok ? 'ok' : 'danger');
+      el.querySelector('span').textContent = ok ? okText : badText;
+    }
+
+    function setCheckWarn(el, ok, okText, warnText){
+      const dot = el.querySelector('.dot');
+      dot.classList.remove('ok','warn','danger');
+      dot.classList.add(ok ? 'ok' : 'warn');
+      el.querySelector('span').textContent = ok ? okText : warnText;
+    }
+
+    function updateChecks(){
+      const dateOk = !!els.date.value && !isWeekend(els.date.value);
+      const slotOk = !!els.slot.value;
+      const dataOk = state.loaded && state.rows.length > 0;
+
+      setCheck(els.checkDate, dateOk, "Дата выбрана", "Дата не выбрана");
+      setCheck(els.checkSlot, slotOk, "Приём пищи выбран", "Приём пищи не выбран");
+      setCheckWarn(els.checkData, dataOk, "Данные загружены", "Данные не загружены");
+
+      els.weekendNote.style.display = (els.date.value && isWeekend(els.date.value)) ? 'block' : 'none';
+
+      const canWork = dateOk && slotOk;
+      els.btnLoad.disabled = !canWork;
+      els.btnApply.disabled = !(dateOk && slotOk && dataOk);
+      els.btnApplyBottom.disabled = els.btnApply.disabled;
+      els.btnClear.disabled = !dataOk;
+      els.btnMarkAllPlan.disabled = !dataOk;
+    }
+
+    function computeChanges(){
+      let ch = 0;
+      for(const r of state.rows){
+        const orig = state.originalAvail.get(r.key);
+        if(orig !== undefined && Number(r.avail) !== Number(orig)) ch++;
+      }
+      state.changes = ch;
+
+      els.changesText.textContent = `Изменений: ${ch}`;
+      els.changesDot.className = 'dot ' + (ch === 0 ? 'ok' : 'warn');
+    }
+
+    function computeKPI(){
+      const lowTh = Number(els.lowThreshold.value || 0);
+      const positions = state.rows.length;
+
+      let planSum = 0, availSum = 0, lowCnt = 0;
+      for(const r of state.rows){
+        planSum += Number(r.plan || 0);
+        availSum += Number(r.avail || 0);
+        if(Number(r.avail) <= 0 || Number(r.avail) <= lowTh) lowCnt++;
+      }
+
+      els.kpiPositions.textContent = positions;
+      els.kpiPlanSum.textContent = planSum;
+      els.kpiAvailSum.textContent = availSum;
+      els.kpiLow.textContent = lowCnt;
+    }
+
+    function rowStatus(avail){
+      const lowTh = Number(els.lowThreshold.value || 0);
+      const a = Number(avail || 0);
+      if(a <= 0) return { cls:'danger', text:'Закончились' };
+      if(a <= lowTh) return { cls:'warn', text:'Мало' };
+      return { cls:'ok', text:'Доступно' };
+    }
+
+    function render(){
+      const q = (els.search.value || '').trim().toLowerCase();
+      const rows = q
+        ? state.rows.filter(r => r.dish.toLowerCase().includes(q) || r.category.toLowerCase().includes(q))
+        : state.rows;
+
+      els.tbody.innerHTML = '';
+
+      if(!state.loaded){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="center muted" colspan="6" style="padding:18px;">Выберите дату и приём пищи, затем загрузите данные</td>`;
+        els.tbody.appendChild(tr);
+        computeKPI();
+        computeChanges();
+        updateChecks();
+        return;
+      }
+
+      if(state.rows.length === 0){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="center muted" colspan="6" style="padding:18px;">Нет данных</td>`;
+        els.tbody.appendChild(tr);
+        computeKPI();
+        computeChanges();
+        updateChecks();
+        return;
+      }
+
+      if(rows.length === 0){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="center muted" colspan="6" style="padding:18px;">Ничего не найдено</td>`;
+        els.tbody.appendChild(tr);
+        computeKPI();
+        computeChanges();
+        updateChecks();
+        return;
+      }
+
+      rows.forEach((r, idx) => {
+        const st = rowStatus(r.avail);
+        const tr = document.createElement('tr');
+        tr.dataset.key = r.key;
+
+        tr.innerHTML = `
+          <td class="center muted">${idx+1}</td>
+          <td>${escapeHtml(r.category)}</td>
+          <td>${escapeHtml(r.dish)}</td>
+          <td class="right mono">${Number(r.plan).toString()}</td>
+          <td class="right">
+            <div class="qty">
+              <input type="number" min="0" step="1" value="${Number(r.avail)}" aria-label="Доступно порций">
+              <span class="muted">порц.</span>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge"><span class="dot ${st.cls}"></span><span>${st.text}</span></span>
+          </td>
+        `;
+
+        const input = tr.querySelector('input[type="number"]');
+        input.addEventListener('input', () => {
+          const v = input.value === '' ? 0 : Number(input.value);
+          r.avail = Math.max(0, Math.floor(v));
+          input.value = r.avail;
+
+          const stNow = rowStatus(r.avail);
+          const badgeDot = tr.querySelector('.status-badge .dot');
+          const badgeText = tr.querySelector('.status-badge span:last-child');
+          badgeDot.className = 'dot ' + stNow.cls;
+          badgeText.textContent = stNow.text;
+
+          computeChanges();
+          computeKPI();
+          updateChecks();
+        });
+
+        els.tbody.appendChild(tr);
+      });
+
+      computeKPI();
+      computeChanges();
+      updateChecks();
+    }
+
+    function loadFromPlanMenu(){
+      const dateStr = els.date.value;
+      const slotVal = els.slot.value;
+
+      if(!dateStr || !slotVal) return;
+      if(isWeekend(dateStr)) return;
+
+      const data = PLAN_MENU[slotVal] || [];
+      state.rows = data.map((x, i) => {
+        const key = `${dateStr}|${slotVal}|${x.category}|${x.dish}`;
+        return {
+          key,
+          category: x.category,
+          dish: x.dish,
+          plan: Number(x.plan),
+          avail: Number(x.plan)
+        };
+      });
+
+      state.originalAvail = new Map();
+      state.rows.forEach(r => state.originalAvail.set(r.key, Number(r.avail)));
+
+      state.loaded = true;
+
+      state.lastUpdate = null;
+      els.lastUpdateText.textContent = 'Последнее обновление: —';
+      els.whoText.textContent = 'Пользователь: —';
+
+      toast("Данные загружены", "Порции установлены по плану", "ok");
+      render();
+    }
+
+    function resetChanges(){
+      if(!state.loaded) return;
+      for(const r of state.rows){
+        const orig = state.originalAvail.get(r.key);
+        if(orig !== undefined) r.avail = Number(orig);
+      }
+      toast("Изменения сброшены", "Значения восстановлены", "ok");
+      render();
+    }
+
+    function clearTable(){
+      state.rows = [];
+      state.originalAvail = new Map();
+      state.loaded = true;
+      state.lastUpdate = null;
+      els.lastUpdateText.textContent = 'Последнее обновление: —';
+      els.whoText.textContent = 'Пользователь: —';
+      toast("Таблица очищена", "Можно загрузить данные заново", "warn");
+      render();
+    }
+
+    function markAllAsPlan(){
+      if(!state.loaded) return;
+      for(const r of state.rows){
+        r.avail = Number(r.plan || 0);
+      }
+      toast("Готово", "Доступность установлена по плану", "ok");
+      render();
+    }
+
+    function applyActualization(){
+      if(!state.loaded || state.rows.length === 0) return;
+      if(!els.date.value || !els.slot.value) return;
+      if(isWeekend(els.date.value)) return;
+
+      // Фиксация результата: обновлено_время + пользователь, актуализация доступных порций
+      const now = new Date();
+      state.lastUpdate = now;
+      els.lastUpdateText.textContent = `Последнее обновление: ${fmtDate(now)} ${fmtTime(now)}`;
+      els.whoText.textContent = `Пользователь: ${state.who}`;
+
+      // После актуализации текущие значения становятся базой
+      state.originalAvail = new Map();
+      state.rows.forEach(r => state.originalAvail.set(r.key, Number(r.avail)));
+
+      toast("Актуализировано", "Доступные порции обновлены", "ok");
+      render();
+    }
+
+    function toast(title, text, kind){
+      els.toastTitle.textContent = title;
+      els.toastText.textContent = text;
+
+      els.toastDot.className = 'dot ' + (kind === 'ok' ? 'ok' : (kind === 'warn' ? 'warn' : 'danger'));
+      els.toast.classList.add('show');
+
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => els.toast.classList.remove('show'), 3800);
+    }
+
+    function escapeHtml(s){
+      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+    }
+
+    function init(){
+      // По умолчанию поставить ближайший рабочий день (если сегодня выходной — следующий понедельник)
+      const now = new Date();
+      let d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      while([0,6].includes(d.getDay())) d.setDate(d.getDate()+1);
+      els.date.value = d.toISOString().slice(0,10);
+
+      updateHeaderDayState();
+      updateChecks();
+      render();
+    }
+
+    // Events
+    els.date.addEventListener('change', () => {
+      updateHeaderDayState();
+      // при смене даты не сбрасываем, но запрещаем работу на выходных
+      updateChecks();
+      render();
+    });
+
+    els.slot.addEventListener('change', () => {
+      updateHeaderDayState();
+      updateChecks();
+    });
+
+    els.search.addEventListener('input', render);
+    els.lowThreshold.addEventListener('input', render);
+
+    els.btnLoad.addEventListener('click', loadFromPlanMenu);
+    els.btnReset.addEventListener('click', resetChanges);
+    els.btnClear.addEventListener('click', clearTable);
+    els.btnMarkAllPlan.addEventListener('click', markAllAsPlan);
+
+    els.btnApply.addEventListener('click', applyActualization);
+    els.btnApplyBottom.addEventListener('click', applyActualization);
+
+    els.toastClose.addEventListener('click', () => els.toast.classList.remove('show'));
+
+    // Header/day pill status
+    function refreshDayPill(){
+      const dateStr = els.date.value;
+      if(!dateStr){
+        els.dotDay.className = 'dot danger';
+        return;
+      }
+      if(isWeekend(dateStr)){
+        els.dotDay.className = 'dot danger';
+      }else if(!els.slot.value){
+        els.dotDay.className = 'dot warn';
+      }else{
+        els.dotDay.className = 'dot ok';
+      }
+    }
+
+    setInterval(() => {
+      refreshDayPill();
+    }, 800);
+
+    init();
+  </script>
+</body>
+</html>

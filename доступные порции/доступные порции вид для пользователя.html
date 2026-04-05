@@ -1,0 +1,877 @@
+<!doctype <htmlhtml>
+ <headlang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Доступные порции на текущий день</title>
+  <style>
+    :root{
+      --t-yellow:#ffdd2d;
+      --t-yellow-2:#ffd11a;
+      --t-black:#111111;
+      --t-text:#1b1b1b;
+      --t-muted:#6b7280;
+      --t-border:#e7e7e7;
+      --t-bg:#ffffff;
+      --t-bg-soft:#fafafa;
+      --t-chip:#fff7cc;
+      --t-danger:#b42318;
+      --t-warning:#8a6100;
+      --t-ok:#127a39;
+      --shadow: 0 10px 30px rgba(17,17,17,.08);
+      --shadow-sm: 0 6px 18px rgba(17,17,17,.08);
+      --radius:16px;
+      --radius-sm:12px;
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--t-text);
+      background:linear-gradient(180deg, #fff 0%, #fff 40%, #fffaf0 100%);
+    }
+
+    /* ======= DEV PANEL (вне формы для скриншота) ======= */
+    .dev-panel{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:#0f0f0f;
+      color:#fff;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      padding:12px 16px;
+    }
+    .dev-panel .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      max-width:1200px;
+      margin:0 auto;
+    }
+    .dev-left, .dev-right{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .dev-title{
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      opacity:.85;
+      margin-right:6px;
+    }
+    .dev-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .dev-chip strong{ font-weight:700; }
+    .dev-panel select, .dev-panel input[type="date"], .dev-panel button{
+      font:inherit;
+      font-size:13px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      padding:8px 10px;
+      outline:none;
+    }
+    .dev-panel button{
+      background:var(--t-yellow);
+      color:#111;
+      border-color:transparent;
+      cursor:pointer;
+      font-weight:700;
+    }
+    .dev-panel button.secondary{
+      background:transparent;
+      color:#fff;
+      border-color:rgba(255,255,255,.22);
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    /* ======= APP ======= */
+    .app{
+      max-width:1200px;
+      margin:24px auto 64px;
+      padding:0 16px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:16px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:240px;
+    }
+    .logo{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      background:var(--t-yellow);
+      display:grid;
+      place-items:center;
+      color:#111;
+      font-weight:900;
+      font-size:22px;
+      box-shadow:0 8px 18px rgba(255,221,45,.35);
+      user-select:none;
+    }
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      line-height:1.15;
+    }
+    .brand-text .title{
+      font-size:16px;
+      font-weight:800;
+      letter-spacing:.01em;
+    }
+    .brand-text .subtitle{
+      font-size:12.5px;
+      color:var(--t-muted);
+      margin-top:3px;
+    }
+
+    .right-meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid var(--t-border);
+      background:var(--t-bg);
+      border-radius:999px;
+      padding:8px 12px;
+      box-shadow:var(--shadow-sm);
+      font-size:13px;
+      color:#111;
+      white-space:nowrap;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--t-yellow-2);
+      box-shadow:0 0 0 4px rgba(255,221,45,.25);
+    }
+    .hint{
+      color:var(--t-muted);
+      font-size:13px;
+      margin: 6px 0 18px;
+    }
+
+    .screen{
+      background:var(--t-bg);
+      border:1px solid var(--t-border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .screen-head{
+      padding:18px 18px 12px;
+      border-bottom:1px solid var(--t-border);
+      background:
+        radial-gradient(1200px 240px at 20% 0%, rgba(255,221,45,.35) 0%, rgba(255,221,45,0) 60%),
+        radial-gradient(900px 220px at 100% 0%, rgba(255,221,45,.18) 0%, rgba(255,221,45,0) 55%),
+        #fff;
+    }
+    .screen-head-top{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:flex-end;
+      justify-content:space-between;
+    }
+    .h1{
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:.01em;
+    }
+    .submeta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12.5px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(17,17,17,.08);
+      background:rgba(255,255,255,.85);
+      color:#111;
+      backdrop-filter: blur(6px);
+    }
+    .badge b{ font-weight:900; }
+
+    .filters{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 1.2fr .9fr .8fr;
+      gap:10px;
+    }
+    .control{
+      background:#fff;
+      border:1px solid var(--t-border);
+      border-radius:14px;
+      padding:10px 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .control label{
+      font-size:12px;
+      color:var(--t-muted);
+      min-width:74px;
+    }
+    .control input[type="text"], .control select{
+      width:100%;
+      border:0;
+      outline:none;
+      font:inherit;
+      font-size:14px;
+      background:transparent;
+      color:#111;
+    }
+    .control .icon{
+      width:32px;height:32px;border-radius:12px;
+      display:grid;place-items:center;
+      background:rgba(255,221,45,.35);
+      border:1px solid rgba(255,221,45,.55);
+      color:#111;
+      flex:0 0 auto;
+      user-select:none;
+      font-weight:900;
+    }
+
+    .screen-body{
+      padding:14px 18px 18px;
+      background:var(--t-bg-soft);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:12px;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--t-border);
+      border-radius:16px;
+      box-shadow:var(--shadow-sm);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:166px;
+    }
+    .card-top{
+      padding:14px 14px 10px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .dish{
+      min-width:0;
+    }
+    .dish-name{
+      margin:0;
+      font-size:15px;
+      font-weight:900;
+      letter-spacing:.01em;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .dish-desc{
+      margin:6px 0 0;
+      font-size:12.5px;
+      color:var(--t-muted);
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      min-height: 34px;
+    }
+    .kcal{
+      font-size:12px;
+      color:#111;
+      background:var(--t-chip);
+      border:1px solid rgba(255,221,45,.55);
+      padding:6px 8px;
+      border-radius:999px;
+      white-space:nowrap;
+      flex:0 0 auto;
+      font-weight:800;
+    }
+
+    .card-mid{
+      padding:0 14px 12px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .availability{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+      flex:1 1 auto;
+    }
+    .bar{
+      height:10px;
+      background:#f0f0f0;
+      border:1px solid #e8e8e8;
+      border-radius:999px;
+      overflow:hidden;
+      flex:1 1 auto;
+      min-width:120px;
+    }
+    .bar > i{
+      display:block;
+      height:100%;
+      width:50%;
+      background: linear-gradient(90deg, var(--t-yellow) 0%, #ffe066 100%);
+      border-right:1px solid rgba(17,17,17,.08);
+    }
+    .qty{
+      font-size:12.5px;
+      color:#111;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .status{
+      font-size:12px;
+      font-weight:900;
+      padding:6px 8px;
+      border-radius:999px;
+      border:1px solid var(--t-border);
+      background:#fff;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .status.ok{
+      border-color: rgba(18,122,57,.25);
+      background: rgba(18,122,57,.08);
+      color: var(--t-ok);
+    }
+    .status.low{
+      border-color: rgba(138,97,0,.25);
+      background: rgba(255,221,45,.18);
+      color: var(--t-warning);
+    }
+    .status.none{
+      border-color: rgba(180,35,24,.20);
+      background: rgba(180,35,24,.06);
+      color: var(--t-danger);
+    }
+
+    .card-bottom{
+      margin-top:auto;
+      padding:12px 14px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-top:1px solid #f1f1f1;
+      background: #fff;
+    }
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      min-width:0;
+    }
+    .chip{
+      font-size:12px;
+      color:#111;
+      background:#fff;
+      border:1px solid var(--t-border);
+      border-radius:999px;
+      padding:6px 8px;
+      white-space:nowrap;
+    }
+    .btn{
+      border:0;
+      cursor:pointer;
+      border-radius:12px;
+      padding:10px 12px;
+      font:inherit;
+      font-size:13.5px;
+      font-weight:900;
+      background:var(--t-yellow);
+      color:#111;
+      box-shadow:0 10px 22px rgba(255,221,45,.25);
+      transition: transform .05s ease, filter .15s ease;
+      white-space:nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn[disabled]{
+      background:#eee;
+      color:#9aa0a6;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+
+    .empty{
+      background:#fff;
+      border:1px dashed #e5e5e5;
+      border-radius:16px;
+      padding:18px;
+      color:var(--t-muted);
+      text-align:center;
+    }
+    .empty h3{
+      margin:0 0 8px;
+      color:#111;
+      font-size:15px;
+      font-weight:900;
+    }
+    .empty p{ margin:0; font-size:13px; }
+
+    @media (max-width: 1020px){
+      .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+      .filters{ grid-template-columns: 1.2fr .9fr; }
+      .filters .control:last-child{ grid-column:1 / -1; }
+    }
+    @media (max-width: 640px){
+      .grid{ grid-template-columns:1fr; }
+      .brand{ min-width:auto; }
+      .filters{ grid-template-columns:1fr; }
+      .right-meta{ justify-content:flex-start; }
+    }
+
+    /* Печатный/скрин режим: можно временно скрыть dev-panel */
+    .hide-dev .dev-panel{ display:none; }
+  <body</style>
+</head>
+
+>
+  <!-- DEV PANEL (не относится к экранной форме; можно выключить для скриншота) -->
+  <div class="dev-panel" id="devPanel">
+    <div class="row">
+      <div class="dev-left">
+        <span class="dev-title">ТЕСТ</span>
+        <span class="dev-chip">Слот: <strong id="devSlotLabel">Обед</strong></span>
+        <span class="dev-chip">Дата: <strong id="devDateLabel">—</strong></span>
+        <span class="dev-chip">Режим: <strong id="devModeLabel">Будний</strong></span>
+      </div>
+      <div class="dev-right">
+        <select id="devSlot">
+          <option value="breakfast">Завтрак</option>
+          <option value="lunch" selected>Обед</option>
+        </select>
+        <input id="devDate" type="date" />
+        <button id="devApply">Применить</button>
+        <button class="secondary" id="devToggle">Скрыть панель (для скриншота)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app" id="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-label="Логотип">Т</div>
+        <div class="brand-text">
+          <div class="title">Корпоративная столовая</div>
+          <div class="subtitle">Доступные порции на текущий день</div>
+        </div>
+      </div>
+
+      <div class="right-meta">
+        <div class="pill" title="Текущий слот">
+          <span class="dot" aria-hidden="true"></span>
+          <span><b id="slotTitle">Обед</b> · <span id="slotTime">12:30–17:00</span></span>
+        </div>
+        <div class="pill" title="Последнее обновление">
+          Обновлено: <b id="lastUpdated">—</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint" id="workHint"></div>
+
+    <!-- SCREEN: Доступные порции на текущий день -->
+    <section class="screen" aria-label="Экранная форма: Доступные порции на текущий день">
+      <header class="screen-head">
+        <div class="screen-head-top">
+          <h1 class="h1">Доступные порции на сегодня · <span id="todayLabel">—</span></h1>
+          <div class="submeta">
+            <span class="badge" title="Всего блюд в текущем слоте"><b id="countAll">0</b> позиций</span>
+            <span class="badge" title="Осталось порций суммарно"><b id="sumAvail">0</b> порций</span>
+          </div>
+        </div>
+
+        <div class="filters" aria-label="Фильтры">
+          <div class="control">
+            <div class="icon">🔎</div>
+            <label for="q">Поиск</label>
+            <input id="q" type="text" placeholder="Введите название блюда" autocomplete="off" />
+          </div>
+
+          <div class="control">
+            <div class="icon">≡</div>
+            <label for="cat">Категория</label>
+            <select id="cat">
+              <option value="all">Все</option>
+            </select>
+          </div>
+
+          <div class="control">
+            <div class="icon">⚑</div>
+            <label for="avail">Наличие</label>
+            <select id="avail">
+              <option value="all">Все</option>
+              <option value="gt0">Только доступные</option>
+              <option value="low">Низкий остаток</option>
+              <option value="zero">Нет порций</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <div class="screen-body">
+        <div class="grid" id="grid"></div>
+        <div class="empty" id="empty" hidden>
+          <h3>Нет доступных позиций по заданным фильтрам</h3>
+          <p>Измените фильтры поиска или категории.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ====== Данные (только то, что требуется для экрана "доступные порции") ======
+    // Блюдо: наименование, описание, калорийность, категория (по ER)
+    // Доступные порции: дата, доступно порций, обновлено время, привязка к блюду и слоту (по ER)
+    const slots = {
+      breakfast: { title: "Завтрак", time: "08:30–10:30" },
+      lunch: { title: "Обед", time: "12:30–17:00" }
+    };
+
+    // Категории и блюда (справочники)
+    const categories = [
+      { id: "cat-soup", name: "Суп" },
+      { id: "cat-salad", name: "Салат" },
+      { id: "cat-main", name: "Горячее" },
+      { id: "cat-side", name: "Гарнир" },
+      { id: "cat-dessert", name: "Десерт" },
+      { id: "cat-drink", name: "Напиток" }
+    ];
+
+    const dishes = [
+      { id: "d1", name: "Борщ", desc: "Классический борщ со сметаной (подача по наличию).", kcal: 180, categoryId: "cat-soup" },
+      { id: "d2", name: "Куриный суп", desc: "Легкий бульон, курица, овощи.", kcal: 140, categoryId: "cat-soup" },
+      { id: "d3", name: "Салат «Овощной»", desc: "Огурцы, томаты, зелень, заправка.", kcal: 120, categoryId: "cat-salad" },
+      { id: "d4", name: "Салат «Цезарь»", desc: "Курица, салат, сухарики, соус.", kcal: 260, categoryId: "cat-salad" },
+      { id: "d5", name: "Котлета куриная", desc: "Подается с гарниром по выбору.", kcal: 320, categoryId: "cat-main" },
+      { id: "d6", name: "Рыба запеченная", desc: "Нежная рыба с лимоном и специями.", kcal: 290, categoryId: "cat-main" },
+      { id: "d7", name: "Гречка", desc: "Рассыпчатая, без добавок.", kcal: 160, categoryId: "cat-side" },
+      { id: "d8", name: "Картофельное пюре", desc: "Сливочное пюре.", kcal: 210, categoryId: "cat-side" },
+      { id: "d9", name: "Сырники", desc: "Сметана/джем по наличию.", kcal: 330, categoryId: "cat-dessert" },
+      { id: "d10", name: "Компот", desc: "Домашний компот из сухофруктов.", kcal: 90, categoryId: "cat-drink" }
+    ];
+
+    // Доступные порции (оперативные данные) по слотам
+    function buildAvailabilityFor(dateISO, slotKey){
+      // "обновлено" — время последней актуализации в рамках дня (по ER)
+      const updated = new Date(dateISO + "T09:05:00");
+      const updatedLunch = new Date(dateISO + "T12:05:00");
+
+      // В выходные никто не питается
+      const day = new Date(dateISO + "T00:00:00").getDay(); // 0 вс, 6 сб
+      const weekend = (day === 0 || day === 6);
+      if (weekend) return { updatedAt: null, items: [] };
+
+      // Наборы блюд в зависимости от слота
+      const map = {
+        breakfast: [
+          { dishId: "d9", avail: 26 },
+          { dishId: "d3", avail: 10 },
+          { dishId: "d10", avail: 80 }
+        ],
+        lunch: [
+          { dishId: "d1", avail: 48 },
+          { dishId: "d2", avail: 0 },
+          { dishId: "d4", avail: 14 },
+          { dishId: "d5", avail: 52 },
+          { dishId: "d6", avail: 9 },
+          { dishId: "d7", avail: 38 },
+          { dishId: "d8", avail: 6 },
+          { dishId: "d10", avail: 120 }
+        ]
+      };
+
+      return {
+        updatedAt: slotKey === "breakfast" ? updated : updatedLunch,
+        items: (map[slotKey] || []).map((x, idx) => ({
+          id: `${dateISO}-${slotKey}-${idx}`, // внутренний id записи "доступные порции"
+          date: dateISO,
+          slotKey,
+          dishId: x.dishId,
+          available: x.avail
+        }))
+      };
+    }
+
+    // ====== UI helpers ======
+    const $ = (sel, root=document) => root.querySelector(sel);
+
+    function pad2(n){ return String(n).padStart(2,"0"); }
+
+    function formatDateRu(dateISO){
+      const d = new Date(dateISO + "T00:00:00");
+      const dd = pad2(d.getDate());
+      const mm = pad2(d.getMonth()+1);
+      const yyyy = d.getFullYear();
+      return `${dd}.${mm}.${yyyy}`;
+    }
+
+    function formatTimeRu(date){
+      const h = pad2(date.getHours());
+      const m = pad2(date.getMinutes());
+      return `${h}:${m}`;
+    }
+
+    function getCategoryName(id){
+      return (categories.find(c => c.id === id)?.name) || "Без категории";
+    }
+
+    function getDish(id){
+      return dishes.find(d => d.id === id);
+    }
+
+    function statusByAvailable(n){
+      if (n <= 0) return { cls: "none", text: "Нет порций" };
+      if (n <= 10) return { cls: "low", text: "Низкий остаток" };
+      return { cls: "ok", text: "Доступно" };
+    }
+
+    function progressWidth(available){
+      // Без добавления новых полей "план", показываем относительную заполненность по шкале.
+      // 0..60 (условная шкала для наглядности)
+      const max = 60;
+      const w = Math.max(0, Math.min(100, Math.round((available / max) * 100)));
+      return w;
+    }
+
+    // ====== Render ======
+    let state = {
+      dateISO: null,
+      slotKey: "lunch",
+      data: { updatedAt: null, items: [] }
+    };
+
+    function fillCategorySelect(){
+      const sel = $("#cat");
+      sel.innerHTML = `<option value="all">Все</option>` + categories
+        .map(c => `<option value="${c.id}">${c.name}</option>`)
+        .join("");
+    }
+
+    function renderHeader(){
+      $("#slotTitle").textContent = slots[state.slotKey].title;
+      $("#slotTime").textContent = slots[state.slotKey].time;
+
+      $("#todayLabel").textContent = formatDateRu(state.dateISO);
+
+      const updated = state.data.updatedAt;
+      $("#lastUpdated").textContent = updated ? `${formatTimeRu(updated)}` : "—";
+
+      const sum = state.data.items.reduce((acc, it) => acc + (it.available || 0), 0);
+      $("#countAll").textContent = String(state.data.items.length);
+      $("#sumAvail").textContent = String(sum);
+
+      const d = new Date(state.dateISO + "T00:00:00");
+      const weekend = (d.getDay() === 0 || d.getDay() === 6);
+
+      if (weekend){
+        $("#workHint").textContent = "Сегодня выходной день — питание не осуществляется.";
+      } else {
+        $("#workHint").textContent = "Показаны позиции текущего слота с учетом актуального остатка порций. Дата фиксирована на «сегодня».";
+      }
+    }
+
+    function getFilteredItems(){
+      const q = ($("#q").value || "").trim().toLowerCase();
+      const cat = $("#cat").value;
+      const avail = $("#avail").value;
+
+      let items = state.data.items
+        .map(it => {
+          const dish = getDish(it.dishId);
+          return { ...it, dish };
+        })
+        .filter(x => x.dish);
+
+      if (q){
+        items = items.filter(x => (x.dish.name || "").toLowerCase().includes(q));
+      }
+      if (cat !== "all"){
+        items = items.filter(x => x.dish.categoryId === cat);
+      }
+      if (avail !== "all"){
+        if (avail === "gt0") items = items.filter(x => x.available > 0);
+        if (avail === "low") items = items.filter(x => x.available > 0 && x.available <= 10);
+        if (avail === "zero") items = items.filter(x => x.available <= 0);
+      }
+
+      // Сортировка: сначала доступные, затем 0; внутри — по категории, затем по названию
+      items.sort((a,b) => {
+        const ao = a.available > 0 ? 0 : 1;
+        const bo = b.available > 0 ? 0 : 1;
+        if (ao !== bo) return ao - bo;
+        const ac = getCategoryName(a.dish.categoryId);
+        const bc = getCategoryName(b.dish.categoryId);
+        const cc = ac.localeCompare(bc, "ru");
+        if (cc !== 0) return cc;
+        return a.dish.name.localeCompare(b.dish.name, "ru");
+      });
+
+      return items;
+    }
+
+    function renderGrid(){
+      const grid = $("#grid");
+      const empty = $("#empty");
+      const items = getFilteredItems();
+
+      grid.innerHTML = items.map(it => {
+        const dish = it.dish;
+        const status = statusByAvailable(it.available);
+        const w = progressWidth(it.available);
+        const categoryName = getCategoryName(dish.categoryId);
+        const kcal = (dish.kcal != null && dish.kcal !== "") ? `${dish.kcal} ккал` : null;
+
+        const disabled = it.available <= 0 ? "disabled" : "";
+        const btnText = it.available <= 0 ? "Недоступно" : "Добавить в заказ";
+
+        return `
+          <article class="card" data-id="${it.id}">
+            <div class="card-top">
+              <div class="dish">
+                <h3 class="dish-name" title="${escapeHtml(dish.name)}">${escapeHtml(dish.name)}</h3>
+                <p class="dish-desc">${escapeHtml(dish.desc || "")}</p>
+              </div>
+              ${kcal ? `<div class="kcal" title="Калорийность">${escapeHtml(kcal)}</div>` : ``}
+            </div>
+
+            <div class="card-mid">
+              <div class="availability" title="Остаток доступных порций">
+                <div class="bar" aria-hidden="true"><i style="width:${w}%"></i></div>
+                <div class="qty">${it.available} порц.</div>
+              </div>
+              <div class="status ${status.cls}">${status.text}</div>
+            </div>
+
+            <div class="card-bottom">
+              <div class="meta">
+                <span class="chip">${escapeHtml(categoryName)}</span>
+                <span class="chip">${escapeHtml(slots[it.slotKey].title)}</span>
+              </div>
+              <button class="btn" ${disabled} type="button">${btnText}</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      empty.hidden = items.length !== 0;
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function loadTodayFixed(dateISO, slotKey){
+      state.dateISO = dateISO;
+      state.slotKey = slotKey;
+      state.data = buildAvailabilityFor(dateISO, slotKey);
+
+      renderHeader();
+      renderGrid();
+    }
+
+    // ====== Init ======
+    (function init(){
+      fillCategorySelect();
+
+      // "сегодня" для формы — фиксировано. Для теста можно менять через dev-panel
+      const today = new Date();
+      const todayISO = `${today.getFullYear()}-${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;
+
+      // Инициализация dev-panel
+      $("#devDate").value = todayISO;
+      $("#devDateLabel").textContent = formatDateRu(todayISO);
+
+      const applyDev = () => {
+        const dateISO = $("#devDate").value || todayISO;
+        const slotKey = $("#devSlot").value;
+
+        const d = new Date(dateISO + "T00:00:00");
+        const weekend = (d.getDay() === 0 || d.getDay() === 6);
+
+        $("#devSlotLabel").textContent = slots[slotKey].title;
+        $("#devDateLabel").textContent = formatDateRu(dateISO);
+        $("#devModeLabel").textContent = weekend ? "Выходной" : "Будний";
+
+        loadTodayFixed(dateISO, slotKey);
+      };
+
+      $("#devApply").addEventListener("click", applyDev);
+      $("#devToggle").addEventListener("click", () => {
+        document.body.classList.toggle("hide-dev");
+        $("#devToggle").textContent = document.body.classList.contains("hide-dev")
+          ? "Показать панель"
+          : "Скрыть панель (для скриншота)";
+      });
+
+      // Фильтры формы
+      ["q","cat","avail"].forEach(id => {
+        $( "#" + id ).addEventListener("input", () => renderGrid());
+        $( "#" + id ).addEventListener("change", () => renderGrid());
+      });
+
+      applyDev();
+    })();
+  </script>
+</body>
+</html>

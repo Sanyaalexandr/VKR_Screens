@@ -1,0 +1,825 @@
+<!doctype <htmlhtml>
+ <headlang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Доступные порции — корпоративная столовая</title>
+  <style>
+    :root{
+      --t-yellow:#ffdd2d;
+      --t-yellow-2:#ffe86a;
+      --t-black:#111114;
+      --t-text:#1b1b1f;
+      --t-muted:#6b6f76;
+      --t-border:#e7e7ea;
+      --t-bg:#f6f7f9;
+      --t-card:#ffffff;
+      --t-ok:#16a34a;
+      --t-warn:#f59e0b;
+      --t-bad:#ef4444;
+      --t-shadow: 0 10px 24px rgba(17,17,20,.08);
+      --t-radius: 18px;
+      --t-radius-sm: 12px;
+      --t-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:var(--t-font);
+      color:var(--t-text);
+      background:
+        radial-gradient(1200px 500px at 20% -10%, rgba(255,221,45,.45), rgba(255,221,45,0) 60%),
+        radial-gradient(900px 420px at 95% 0%, rgba(255,221,45,.28), rgba(255,221,45,0) 55%),
+        var(--t-bg);
+    }
+
+    /* ====== TEST CONTROLS (outside screenshot area) ====== */
+    .testbar{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(246,247,249,.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--t-border);
+    }
+    .testbar-inner{
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .testbar .left, .testbar .right{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .chip{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid var(--t-border);
+      background: #fff;
+      border-radius: 999px;
+      box-shadow: 0 6px 16px rgba(17,17,20,.05);
+      font-size: 13px;
+      color: var(--t-muted);
+      white-space:nowrap;
+    }
+    .chip strong{ color: var(--t-text); font-weight: 700; }
+    .control{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid var(--t-border);
+      background:#fff;
+      border-radius: 999px;
+      box-shadow: 0 6px 16px rgba(17,17,20,.05);
+      font-size:13px;
+    }
+    .control label{ color:var(--t-muted); }
+    .control input, .control select{
+      border: none;
+      outline: none;
+      font: inherit;
+      color: var(--t-text);
+      background: transparent;
+      padding: 0;
+    }
+    .btn{
+      border: 1px solid transparent;
+      background: var(--t-yellow);
+      color: var(--t-black);
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 9px 12px;
+      cursor:pointer;
+      box-shadow: 0 10px 20px rgba(255,221,45,.25);
+      transition: transform .06s ease, filter .15s ease;
+      font-size: 13px;
+      white-space:nowrap;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.secondary{
+      background:#fff;
+      border-color: var(--t-border);
+      box-shadow: 0 10px 20px rgba(17,17,20,.05);
+      font-weight: 700;
+    }
+    .btn.ghost{
+      background: transparent;
+      border-color: var(--t-border);
+      box-shadow: none;
+      font-weight: 700;
+    }
+
+    /* ====== SCREEN (screenshot area) ====== */
+    .wrap{
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    .screen{
+      background: var(--t-card);
+      border: 1px solid var(--t-border);
+      border-radius: var(--t-radius);
+      box-shadow: var(--t-shadow);
+      overflow: hidden;
+    }
+
+    .screen-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding: 18px 18px;
+      border-bottom: 1px solid var(--t-border);
+      background:
+        linear-gradient(180deg, rgba(255,221,45,.55), rgba(255,221,45,.0) 85%),
+        #fff;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 240px;
+    }
+    .logo{
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display:grid;
+      place-items:center;
+      background: var(--t-yellow);
+      color: var(--t-black);
+      font-weight: 900;
+      font-size: 20px;
+      box-shadow: 0 10px 18px rgba(255,221,45,.25);
+      flex: 0 0 auto;
+    }
+    .titleblock{
+      display:flex;
+      flex-direction:column;
+      line-height:1.2;
+    }
+    .titleblock .title{
+      font-weight: 900;
+      font-size: 16px;
+      letter-spacing: .2px;
+    }
+    .titleblock .subtitle{
+      color: var(--t-muted);
+      font-size: 12.5px;
+      margin-top: 2px;
+    }
+
+    .header-meta{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--t-border);
+      background: rgba(255,255,255,.85);
+      font-size: 13px;
+      color: var(--t-muted);
+    }
+    .dot{
+      width:10px; height:10px;
+      border-radius: 999px;
+      background: var(--t-ok);
+      box-shadow: 0 0 0 3px rgba(22,163,74,.12);
+      flex: 0 0 auto;
+    }
+    .dot.warn{
+      background: var(--t-warn);
+      box-shadow: 0 0 0 3px rgba(245,158,11,.14);
+    }
+    .dot.bad{
+      background: var(--t-bad);
+      box-shadow: 0 0 0 3px rgba(239,68,68,.14);
+    }
+
+    .screen-body{
+      padding: 18px;
+      display:grid;
+      grid-template-columns: 340px 1fr;
+      gap: 14px;
+      align-items:start;
+    }
+
+    @media (max-width: 980px){
+      .screen-body{ grid-template-columns: 1fr; }
+      .brand{ min-width: unset; }
+    }
+
+    .card{
+      border: 1px solid var(--t-border);
+      border-radius: var(--t-radius-sm);
+      background: #fff;
+      overflow:hidden;
+    }
+    .card-h{
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--t-border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: linear-gradient(180deg, rgba(255,221,45,.22), rgba(255,221,45,0));
+    }
+    .card-h .h{
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing:.2px;
+    }
+    .card-h .mini{
+      color: var(--t-muted);
+      font-size: 12px;
+      white-space:nowrap;
+    }
+    .card-b{ padding: 12px; }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom: 10px;
+    }
+    .field:last-child{ margin-bottom:0; }
+    .label{
+      font-size: 12px;
+      color: var(--t-muted);
+    }
+    .value{
+      font-weight: 800;
+      color: var(--t-text);
+      font-size: 14px;
+    }
+
+    .kpi{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top: 10px;
+    }
+    .kpi .box{
+      border: 1px solid var(--t-border);
+      border-radius: 14px;
+      padding: 10px;
+      background: #fff;
+    }
+    .kpi .box .k{ color: var(--t-muted); font-size: 12px; }
+    .kpi .box .v{ font-weight: 950; font-size: 18px; margin-top: 3px; }
+
+    /* table */
+    .toolbar{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--t-border);
+      background: #fff;
+    }
+    .search{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding: 9px 10px;
+      border: 1px solid var(--t-border);
+      border-radius: 12px;
+      background: #fff;
+      min-width: 260px;
+      flex: 1 1 260px;
+    }
+    .search input{
+      border:none;
+      outline:none;
+      font:inherit;
+      width:100%;
+    }
+    .filterline{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .select{
+      padding: 9px 10px;
+      border:1px solid var(--t-border);
+      border-radius: 12px;
+      background:#fff;
+      font:inherit;
+      color: var(--t-text);
+      min-width: 210px;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+    }
+    thead th{
+      text-align:left;
+      font-size: 12px;
+      color: var(--t-muted);
+      font-weight: 800;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--t-border);
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tbody td{
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--t-border);
+      font-size: 13.5px;
+      vertical-align: middle;
+    }
+    tbody tr:hover{ background: rgba(255,221,45,.12); }
+    .right{ text-align:right; }
+    .muted{ color: var(--t-muted); }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--t-border);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--t-text);
+      white-space:nowrap;
+    }
+    .badge .s{
+      width:8px; height:8px; border-radius:999px;
+      background: var(--t-ok);
+      box-shadow: 0 0 0 3px rgba(22,163,74,.12);
+    }
+    .badge.warn .s{
+      background: var(--t-warn);
+      box-shadow: 0 0 0 3px rgba(245,158,11,.14);
+    }
+    .badge.bad .s{
+      background: var(--t-bad);
+      box-shadow: 0 0 0 3px rgba(239,68,68,.14);
+    }
+
+    .empty{
+      padding: 18px 12px;
+      color: var(--t-muted);
+      font-size: 13px;
+    }
+
+    .foot{
+      padding: 10px 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      color: var(--t-muted);
+      font-size: 12px;
+      background: #fff;
+    }
+    .hint{
+      display:flex; gap:8px; align-items:center;
+    }
+    .spark{
+      width:10px; height:10px; border-radius:999px;
+      background: var(--t-yellow);
+      box-shadow: 0 0 0 4px rgba(255,221,45,.25);
+    }
+
+    /* Hide testbar on print/screenshot via print (optional) */
+    @media print{
+      .testbar{ display:none !important; }
+      body{ background:#fff; }
+      .wrap{ padding-top: 0; }
+    }
+  <body</style>
+</head>
+>
+
+  <!-- TEST CONTROLS (must be outside the screen for screenshots) -->
+  <div class="testbar" aria-label="Тестовые элементы управления (не входят в форму)">
+    <div class="testbar-inner">
+      <div class="left">
+        <div class="chip"><strong>Тест</strong> выбор даты/периода</div>
+
+        <div class="control">
+          <label for="preset">Период</label>
+          <select id="preset">
+            <option value="today">Сегодня</option>
+            <option value="tomorrow">Завтра</option>
+            <option value="nextWorkday" selected>Следующий рабочий день</option>
+          </select>
+        </div>
+
+        <div class="control">
+          <label for="testDate">Дата</label>
+          <input id="testDate" type="date" />
+        </div>
+
+        <button class="btn secondary" id="applyPreset">Применить</button>
+      </div>
+
+      <div class="right">
+        <button class="btn ghost" id="randomize">Случайные остатки</button>
+        <button class="btn" id="reset">Сброс</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- SCREEN (this is the form to screenshot) -->
+    <section class="screen" aria-label="Экранная форма: Доступные порции на текущий день">
+      <header class="screen-header">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">Т</div>
+          <div class="titleblock">
+            <div class="title">Доступные порции на текущий день</div>
+            <div class="subtitle">Оперативный контроль доступности блюд по выбранной дате и приёму пищи</div>
+          </div>
+        </div>
+
+        <div class="header-meta">
+          <div class="pill" title="Состояние данных">
+            <span class="dot" id="stateDot" aria-hidden="true"></span>
+            <span id="stateText">Данные актуальны</span>
+          </div>
+          <div class="pill" title="Время последней актуализации">
+            <span class="spark" aria-hidden="true"></span>
+            <span>Обновлено: <strong id="lastUpdated">—</strong></span>
+          </div>
+        </div>
+      </header>
+
+      <div class="screen-body">
+        <!-- Left: parameters -->
+        <aside class="card">
+          <div class="card-h">
+            <div class="h">Параметры</div>
+            <div class="mini" id="workdayBadge">—</div>
+          </div>
+          <div class="card-b">
+            <div class="field">
+              <div class="label">Дата</div>
+              <div class="value" id="uiDate">—</div>
+            </div>
+            <div class="field">
+              <div class="label">Приём пищи</div>
+              <div class="value" id="uiSlot">—</div>
+            </div>
+
+            <div class="kpi">
+              <div class="box">
+                <div class="k">Позиции меню</div>
+                <div class="v" id="kpiItems">0</div>
+              </div>
+              <div class="box">
+                <div class="k">Доступно порций</div>
+                <div class="v" id="kpiTotal">0</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px; border-top:1px solid var(--t-border); padding-top:12px;">
+              <div class="field" style="margin-bottom:0;">
+                <div class="label">Примечание</div>
+                <div class="value" style="font-weight:700; font-size:13px; color:var(--t-muted);" id="note">
+                  Для выходных питание не предусмотрено.
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Right: list -->
+        <section class="card" aria-label="Список доступных порций">
+          <div class="toolbar">
+            <div class="search" role="search">
+              <span class="muted" aria-hidden="true">Поиск</span>
+              <input id="search" type="text" placeholder="Начните вводить название блюда…" />
+            </div>
+
+            <div class="filterline">
+              <select class="select" id="slotSelect" aria-label="Выбор приёма пищи">
+                <option value="breakfast">Завтрак (08:30–10:30)</option>
+                <option value="lunch" selected>Обед (12:30–17:00)</option>
+              </select>
+              <select class="select" id="availabilityFilter" aria-label="Фильтр по доступности">
+                <option value="all" selected>Все позиции</option>
+                <option value="low">Низкий остаток</option>
+                <option value="zero">Порции закончились</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="max-height: 420px; overflow:auto;">
+            <table aria-label="Таблица доступных порций">
+              <thead>
+                <tr>
+                  <th style="width:52%;">Блюдо</th>
+                  <th style="width:26%;">Категория</th>
+                  <th class="right" style="width:12%;">Порции</th>
+                  <th style="width:10%;">Статус</th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+            <div class="empty" id="empty" hidden>Нет данных для отображения.</div>
+          </div>
+
+          <div class="foot">
+            <div class="hint">
+              <span class="spark" aria-hidden="true"></span>
+              <span>Индикатор «Низкий остаток» применяется при значении ≤ <strong id="lowThresholdUi">10</strong> порций.</span>
+            </div>
+            <div class="muted" id="footSummary">—</div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ========= Seed data (strictly within ER scope: блюдо + категория + доступные порции + слот + дата + обновлено время) =========
+    const LOW_THRESHOLD_DEFAULT = 10;
+
+    const catalog = [
+      { dish: "Каша овсяная", category: "Завтрак", baseBreakfast: 120, baseLunch: 0 },
+      { dish: "Сырники", category: "Завтрак", baseBreakfast: 70, baseLunch: 0 },
+      { dish: "Омлет", category: "Завтрак", baseBreakfast: 90, baseLunch: 0 },
+
+      { dish: "Борщ", category: "Суп", baseBreakfast: 0, baseLunch: 140 },
+      { dish: "Суп куриный", category: "Суп", baseBreakfast: 0, baseLunch: 130 },
+      { dish: "Салат овощной", category: "Салат", baseBreakfast: 0, baseLunch: 180 },
+      { dish: "Салат «Цезарь»", category: "Салат", baseBreakfast: 0, baseLunch: 110 },
+      { dish: "Гречка", category: "Гарнир", baseBreakfast: 0, baseLunch: 220 },
+      { dish: "Рис", category: "Гарнир", baseBreakfast: 0, baseLunch: 200 },
+      { dish: "Куриная котлета", category: "Горячее", baseBreakfast: 0, baseLunch: 160 },
+      { dish: "Говядина тушёная", category: "Горячее", baseBreakfast: 0, baseLunch: 120 },
+      { dish: "Компот", category: "Напиток", baseBreakfast: 0, baseLunch: 260 },
+      { dish: "Чай", category: "Напиток", baseBreakfast: 0, baseLunch: 300 },
+      { dish: "Хлеб", category: "Дополнительно", baseBreakfast: 0, baseLunch: 500 }
+    ];
+
+    const state = {
+      date: null,
+      slot: "lunch", // breakfast | lunch
+      lowThreshold: LOW_THRESHOLD_DEFAULT,
+      data: [] // rows with {dish, category, portions}
+    };
+
+    // ========= Helpers =========
+    const $ = (id) => document.getElementById(id);
+
+    function pad2(n){ return String(n).padStart(2,"0"); }
+
+    function formatDateHuman(d){
+      const wd = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"][d.getDay()];
+      const m = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"][d.getMonth()];
+      return `${d.getDate()} ${m} ${d.getFullYear()} (${wd})`;
+    }
+
+    function isWeekend(d){
+      const day = d.getDay();
+      return day === 0 || day === 6;
+    }
+
+    function nextWorkday(fromDate){
+      const d = new Date(fromDate);
+      do { d.setDate(d.getDate() + 1); } while(isWeekend(d));
+      return d;
+    }
+
+    function nowTime(){
+      const t = new Date();
+      return `${pad2(t.getHours())}:${pad2(t.getMinutes())}:${pad2(t.getSeconds())}`;
+    }
+
+    function computePortions(base){
+      // Deterministic-ish value for stable screenshots; depends on date + slot + dish length
+      const d = state.date;
+      const salt = (d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate()) + (state.slot === "breakfast" ? 17 : 37);
+      const jitter = (salt + base*3) % 23; // 0..22
+      let v = base - jitter;
+      if (v < 0) v = 0;
+      return v;
+    }
+
+    function buildData(){
+      const rows = catalog
+        .map(x => {
+          const base = state.slot === "breakfast" ? x.baseBreakfast : x.baseLunch;
+          const portions = computePortions(base);
+          return { dish: x.dish, category: x.category, portions };
+        })
+        .filter(r => (state.slot === "breakfast" ? r.portions > 0 : true)); // breakfast only shows breakfast items
+      state.data = rows;
+      $('lastUpdated').textContent = nowTime();
+    }
+
+    function statusBadge(portions){
+      if (portions === 0) return { cls: "badge bad", text: "Нет", dotCls: "s" };
+      if (portions <= state.lowThreshold) return { cls: "badge warn", text: "Мало", dotCls: "s" };
+      return { cls: "badge", text: "Есть", dotCls: "s" };
+    }
+
+    function render(){
+      const d = state.date;
+      const weekend = isWeekend(d);
+
+      $('uiDate').textContent = formatDateHuman(d);
+      $('uiSlot').textContent = state.slot === "breakfast" ? "Завтрак (08:30–10:30)" : "Обед (12:30–17:00)";
+      $('lowThresholdUi').textContent = state.lowThreshold;
+
+      if (weekend){
+        $('workdayBadge').textContent = "Выходной день";
+        $('stateDot').className = "dot bad";
+        $('stateText').textContent = "Питание не проводится";
+        $('note').textContent = "Выбран выходной день. Заказы и выдача не выполняются; доступные порции не формируются.";
+        $('kpiItems').textContent = "0";
+        $('kpiTotal').textContent = "0";
+        $('rows').innerHTML = "";
+        $('empty').hidden = false;
+        $('empty').textContent = "На выходных питание не предусмотрено — данных нет.";
+        $('footSummary').textContent = "0 позиций";
+        return;
+      } else {
+        $('workdayBadge').textContent = "Рабочий день";
+        $('stateDot').className = "dot";
+        $('stateText').textContent = "Данные актуальны";
+        $('note').textContent = "Доступность уменьшается по мере оформления заказов.";
+      }
+
+      const q = $('search').value.trim().toLowerCase();
+      const f = $('availabilityFilter').value;
+
+      let filtered = state.data.slice();
+
+      if (q){
+        filtered = filtered.filter(r => r.dish.toLowerCase().includes(q));
+      }
+
+      if (f === "low"){
+        filtered = filtered.filter(r => r.portions > 0 && r.portions <= state.lowThreshold);
+      } else if (f === "zero"){
+        filtered = filtered.filter(r => r.portions === 0);
+      }
+
+      const totalItems = state.data.length;
+      const totalPortions = state.data.reduce((s,r)=>s+r.portions,0);
+
+      $('kpiItems').textContent = String(totalItems);
+      $('kpiTotal').textContent = String(totalPortions);
+
+      $('rows').innerHTML = "";
+      $('empty').hidden = filtered.length !== 0;
+
+      for (const r of filtered){
+        const st = statusBadge(r.portions);
+        const tr = document.createElement('tr');
+
+        const tdDish = document.createElement('td');
+        tdDish.textContent = r.dish;
+
+        const tdCat = document.createElement('td');
+        tdCat.innerHTML = `<span class="muted">${r.category}</span>`;
+
+        const tdP = document.createElement('td');
+        tdP.className = "right";
+        tdP.style.fontWeight = "900";
+        tdP.textContent = String(r.portions);
+
+        const tdS = document.createElement('td');
+        tdS.innerHTML = `<span class="${st.cls}"><span class="s" aria-hidden="true"></span>${st.text}</span>`;
+
+        tr.appendChild(tdDish);
+        tr.appendChild(tdCat);
+        tr.appendChild(tdP);
+        tr.appendChild(tdS);
+
+        $('rows').appendChild(tr);
+      }
+
+      const lowCnt = state.data.filter(r => r.portions > 0 && r.portions <= state.lowThreshold).length;
+      const zeroCnt = state.data.filter(r => r.portions === 0).length;
+      $('footSummary').textContent = `${totalItems} позиций • низкий остаток: ${lowCnt} • закончились: ${zeroCnt}`;
+    }
+
+    function setDate(d){
+      state.date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      buildData();
+      render();
+    }
+
+    function init(){
+      // default date for demo: next workday
+      const today = new Date();
+      const d0 = isWeekend(today) ? nextWorkday(today) : nextWorkday(today);
+
+      $('testDate').value = `${d0.getFullYear()}-${pad2(d0.getMonth()+1)}-${pad2(d0.getDate())}`;
+      state.slot = $('slotSelect').value;
+      setDate(d0);
+
+      // events
+      $('slotSelect').addEventListener('change', () => {
+        state.slot = $('slotSelect').value;
+        buildData();
+        render();
+      });
+
+      $('availabilityFilter').addEventListener('change', render);
+      $('search').addEventListener('input', render);
+
+      $('applyPreset').addEventListener('click', () => {
+        const preset = $('preset').value;
+        const base = new Date();
+        let d = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+
+        if (preset === "today"){
+          // if weekend -> keep weekend to demonstrate rule
+        } else if (preset === "tomorrow"){
+          d.setDate(d.getDate() + 1);
+        } else if (preset === "nextWorkday"){
+          d = isWeekend(d) ? nextWorkday(d) : nextWorkday(d);
+        }
+
+        $('testDate').value = `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+        setDate(d);
+      });
+
+      $('testDate').addEventListener('change', () => {
+        const v = $('testDate').value;
+        if (!v) return;
+        const [y,m,day] = v.split('-').map(Number);
+        setDate(new Date(y, m-1, day));
+      });
+
+      $('randomize').addEventListener('click', () => {
+        // Within ER scope: only changes "доступно порций" and "обновлено время"
+        if (isWeekend(state.date)){
+          $('lastUpdated').textContent = nowTime();
+          render();
+          return;
+        }
+        state.data = state.data.map(r => {
+          // random but bounded
+          const max = Math.max(r.portions, (state.slot === "breakfast" ? 140 : 300));
+          const portions = Math.max(0, Math.floor(Math.random() * (max + 1)));
+          return { ...r, portions };
+        });
+        $('lastUpdated').textContent = nowTime();
+
+        // update header state based on stock situation
+        const zeroCnt = state.data.filter(r => r.portions === 0).length;
+        const dot = $('stateDot');
+        const text = $('stateText');
+        if (zeroCnt === state.data.length){
+          dot.className = "dot bad";
+          text.textContent = "Нет доступных порций";
+        } else if (zeroCnt > 0){
+          dot.className = "dot warn";
+          text.textContent = "Часть позиций закончилась";
+        } else {
+          dot.className = "dot";
+          text.textContent = "Данные актуальны";
+        }
+        render();
+      });
+
+      $('reset').addEventListener('click', () => {
+        const v = $('testDate').value;
+        const [y,m,day] = v.split('-').map(Number);
+        state.slot = $('slotSelect').value;
+        setDate(new Date(y, m-1, day));
+        $('search').value = "";
+        $('availabilityFilter').value = "all";
+        $('stateDot').className = "dot";
+        $('stateText').textContent = "Данные актуальны";
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>

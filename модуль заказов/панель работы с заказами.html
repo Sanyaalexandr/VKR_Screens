@@ -1,0 +1,1328 @@
+<!doctype <htmlhtml>
+ <headlang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>АРМ раздачи — Заказы на сборке</title>
+  <style>
+    :root{
+      --bg:#FFF9E6;
+      --surface:#FFFFFF;
+      --surface2:#FFFEF7;
+      --text:#1F2328;
+      --muted:#6B7280;
+      --border:#E6E8EC;
+
+      --t-yellow:#FFD24A;
+      --t-yellow-2:#FFEA99;
+      --t-yellow-3:#FFF3C4;
+      --t-black:#111827;
+
+      --ok:#16A34A;
+      --warn:#F59E0B;
+      --bad:#DC2626;
+      --info:#2563EB;
+
+      --shadow: 0 10px 25px rgba(17,24,39,.08);
+      --radius:16px;
+      --radius2:12px;
+      --focus: 0 0 0 4px rgba(255, 210, 74, .45);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(255,210,74,.45), transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, rgba(255,234,153,.55), transparent 55%),
+        var(--bg);
+    }
+
+    a{color:inherit}
+    .app{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Topbar */
+    .topbar{
+      position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 249, 230, .75);
+      border-bottom:1px solid rgba(230,232,236,.8);
+    }
+    .topbar-inner{
+      max-width:1280px;
+      margin:0 auto;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      min-width:260px;
+    }
+    .logo{
+      width:42px; height:42px;
+      border-radius:14px;
+      background: linear-gradient(135deg, var(--t-yellow), var(--t-yellow-2));
+      display:grid; place-items:center;
+      box-shadow: 0 10px 20px rgba(255, 210, 74, .35);
+      border:1px solid rgba(17,24,39,.08);
+      font-weight:900;
+      color:var(--t-black);
+      font-size:22px;
+      letter-spacing:.5px;
+      user-select:none;
+    }
+    .brand-title{
+      display:flex; flex-direction:column; line-height:1.1;
+    }
+    .brand-title strong{font-size:14px}
+    .brand-title span{font-size:12px; color:var(--muted)}
+    .topbar-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-left:auto;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.9);
+      border:1px solid var(--border);
+      box-shadow: 0 6px 18px rgba(17,24,39,.06);
+      font-size:13px;
+      color:var(--t-black);
+      white-space:nowrap;
+    }
+    .pill b{font-family:var(--mono); font-weight:700}
+    .btn{
+      appearance:none;
+      border:1px solid rgba(17,24,39,.10);
+      background: #fff;
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:700;
+      font-size:13px;
+      color:var(--t-black);
+      cursor:pointer;
+      box-shadow: 0 6px 18px rgba(17,24,39,.06);
+      display:inline-flex; align-items:center; gap:10px;
+    }
+    .btn:focus{outline:none; box-shadow: var(--focus), 0 6px 18px rgba(17,24,39,.06)}
+    .btn.primary{
+      background: linear-gradient(135deg, var(--t-yellow), var(--t-yellow-2));
+      border-color: rgba(17,24,39,.10);
+    }
+    .btn.ghost{
+      background: rgba(255,255,255,.75);
+    }
+    .btn .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--ok);
+      box-shadow: 0 0 0 4px rgba(22,163,74,.12);
+    }
+
+    /* Layout */
+    .container{
+      max-width:1280px;
+      margin:0 auto;
+      width:100%;
+      padding:18px;
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap:16px;
+      align-items:start;
+      flex:1;
+    }
+
+    @media (max-width: 1100px){
+      .container{grid-template-columns:1fr}
+      .brand{min-width:unset}
+    }
+
+    .card{
+      background: rgba(255,255,255,.92);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card-h{
+      padding:14px 14px 12px 14px;
+      border-bottom:1px solid rgba(230,232,236,.9);
+      background: linear-gradient(180deg, rgba(255, 243, 196, .75), rgba(255,255,255,.0));
+    }
+    .card-h .title{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .card-h h1, .card-h h2{
+      margin:0;
+      font-size:15px;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      border:1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.85);
+      color:var(--t-black);
+      white-space:nowrap;
+    }
+    .badge .mini{
+      width:8px; height:8px; border-radius:50%;
+      background: var(--info);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+    }
+
+    .card-b{padding:14px}
+
+    /* Filters */
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .grid3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 1100px){
+      .grid, .grid3{grid-template-columns:1fr}
+    }
+
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 6px 2px;
+    }
+    .control{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:11px 12px;
+      background: rgba(255,255,255,.95);
+      color:var(--t-black);
+      font-size:13px;
+      box-shadow: inset 0 1px 0 rgba(17,24,39,.03);
+    }
+    .control:focus{outline:none; box-shadow: var(--focus); border-color: rgba(255,210,74,.85)}
+    .seg{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .chip{
+      border:1px solid rgba(17,24,39,.10);
+      background: rgba(255,255,255,.85);
+      color: var(--t-black);
+      border-radius: 999px;
+      padding:9px 10px;
+      font-weight:700;
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .chip:focus{outline:none; box-shadow: var(--focus)}
+    .chip[aria-pressed="true"]{
+      background: linear-gradient(135deg, var(--t-yellow), var(--t-yellow-2));
+      border-color: rgba(17,24,39,.12);
+    }
+    .chip .count{
+      font-family:var(--mono);
+      font-weight:800;
+      font-size:12px;
+      padding:2px 7px;
+      border-radius:999px;
+      background: rgba(17,24,39,.06);
+      border:1px solid rgba(17,24,39,.08);
+    }
+    .chip[aria-pressed="true"] .count{
+      background: rgba(255,255,255,.75);
+    }
+
+    .kpis{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 1100px){
+      .kpis{grid-template-columns:1fr}
+    }
+    .kpi{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background: rgba(255,255,255,.85);
+      padding:12px;
+    }
+    .kpi .k{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+    }
+    .kpi .v{
+      font-family:var(--mono);
+      font-weight:900;
+      font-size:18px;
+      color:var(--t-black);
+    }
+
+    /* Orders list */
+    .main-card .card-h{
+      padding:14px;
+    }
+    .main-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1.35fr .65fr;
+      gap:12px;
+      padding:14px;
+    }
+    @media (max-width: 1100px){
+      .split{grid-template-columns:1fr}
+    }
+
+    .panel{
+      border:1px solid var(--border);
+      border-radius: var(--radius2);
+      background: rgba(255,255,255,.88);
+      overflow:hidden;
+      min-height: 520px;
+    }
+    .panel-h{
+      padding:12px;
+      border-bottom:1px solid rgba(230,232,236,.9);
+      background: linear-gradient(180deg, rgba(255, 243, 196, .55), rgba(255,255,255,.0));
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .panel-h strong{font-size:13px}
+    .panel-h span{font-size:12px; color:var(--muted)}
+    .list{
+      max-height: 520px;
+      overflow:auto;
+    }
+    .order{
+      padding:12px;
+      border-bottom:1px solid rgba(230,232,236,.9);
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      cursor:pointer;
+      background: rgba(255,255,255,.0);
+    }
+    .order:hover{background: rgba(255, 243, 196, .28)}
+    .order[aria-selected="true"]{
+      background: rgba(255, 234, 153, .45);
+      outline: 2px solid rgba(255, 210, 74, .55);
+      outline-offset: -2px;
+    }
+    .order-top{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    }
+    .oid{
+      font-family:var(--mono);
+      font-weight:900;
+      font-size:12px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid rgba(17,24,39,.10);
+      background: rgba(255,255,255,.8);
+    }
+    .meta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+    }
+    .status{
+      display:inline-flex; align-items:center; gap:8px;
+      font-weight:800;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.8);
+      white-space:nowrap;
+      height: fit-content;
+    }
+    .status .s-dot{
+      width:8px; height:8px; border-radius:50%;
+      background: var(--info);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+    }
+    .status.ok .s-dot{background: var(--ok); box-shadow: 0 0 0 4px rgba(22,163,74,.12)}
+    .status.warn .s-dot{background: var(--warn); box-shadow: 0 0 0 4px rgba(245,158,11,.14)}
+    .status.bad .s-dot{background: var(--bad); box-shadow: 0 0 0 4px rgba(220,38,38,.12)}
+
+    /* Detail */
+    .detail{
+      padding:12px;
+    }
+    .detail .head{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+      padding-bottom:10px;
+      border-bottom:1px solid rgba(230,232,236,.9);
+    }
+    .detail h3{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .detail .small{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 1100px){
+      .kv{grid-template-columns:1fr}
+    }
+    .kv .box{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px;
+      background: rgba(255,255,255,.9);
+    }
+    .kv .k{font-size:12px; color:var(--muted); margin-bottom:6px}
+    .kv .v{font-family:var(--mono); font-weight:900; font-size:13px}
+
+    .items{
+      margin-top:12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      overflow:hidden;
+      background: rgba(255,255,255,.9);
+    }
+    .items-h{
+      padding:10px 12px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      border-bottom:1px solid rgba(230,232,236,.9);
+      background: rgba(255, 243, 196, .35);
+      font-size:12px;
+      color:var(--muted);
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+    th, td{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(230,232,236,.9);
+      font-size:13px;
+      text-align:left;
+      vertical-align:top;
+    }
+    th{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      background: rgba(255,255,255,.75);
+    }
+    tr:last-child td{border-bottom:none}
+    .qty{
+      font-family:var(--mono);
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .quick{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 1100px){
+      .quick{grid-template-columns:1fr}
+    }
+    .btn.big{
+      padding:12px 12px;
+      border-radius:14px;
+      justify-content:center;
+      font-size:13px;
+    }
+    .btn.soft{
+      background: rgba(255,255,255,.9);
+    }
+
+    .footer-note{
+      padding:12px 14px 16px 14px;
+      color:var(--muted);
+      font-size:12px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      border-top:1px solid rgba(230,232,236,.9);
+      background: rgba(255,255,255,.6);
+    }
+
+    .toast{
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      background: rgba(17,24,39,.92);
+      color:#fff;
+      padding:12px 14px;
+      border-radius:14px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.18);
+      max-width: 360px;
+      display:none;
+      font-size:13px;
+      line-height:1.25;
+    }
+    .toast strong{display:block; margin-bottom:4px; font-size:13px}
+  <body</style>
+</head>
+>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="logo" aria-label="Логотип">Т</div>
+          <div class="brand-title">
+            <strong>АРМ раздачи</strong>
+            <span>Заказы на сборке (текущий слот)</span>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="pill" title="Дата">
+            <span>Дата:</span> <b id="todayPill">—</b>
+          </div>
+          <div class="pill" title="Слот питания">
+            <span>Слот:</span> <b id="slotPill">—</b>
+          </div>
+          <button class="btn primary" id="refreshBtn" type="button" title="Обновить список">
+            <span class="dot" aria-hidden="true"></span>
+            Обновить
+          </button>
+          <button class="btn ghost" id="markNoShowBtn" type="button" title="Завершить невыданные заказы в конце слота">
+            Завершить все
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- LEFT: filters -->
+      <section class="card">
+        <div class="card-h">
+          <div class="title">
+            <h2>Фильтры и контроль</h2>
+            <span class="badge" title="Обновление списка">
+              <span class="mini" aria-hidden="true"></span>
+              <span id="lastUpdate">нет данных</span>
+            </span>
+          </div>
+          <div class="sub">
+            <span>Отбор по дате и слоту, поиск по номеру, фильтр по статусам</span>
+          </div>
+        </div>
+
+        <div class="card-b">
+          <div class="grid">
+            <div>
+              <label for="dateCtrl">Дата</label>
+              <input class="control" id="dateCtrl" type="date" />
+            </div>
+            <div>
+              <label for="slotCtrl">Слот питания</label>
+              <select class="control" id="slotCtrl"></select>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <label for="searchCtrl">Поиск</label>
+            <input class="control" id="searchCtrl" type="search" placeholder="Введите номер заказа" />
+          </div>
+
+          <div style="margin-top:12px;">
+            <label>Статусы</label>
+            <div class="seg" role="group" aria-label="Фильтр по статусам">
+              <button class="chip" type="button" data-status="all" aria-pressed="true">
+                Все <span class="count" id="cAll">0</span>
+              </button>
+              <button class="chip" type="button" data-status="created" aria-pressed="false">
+                Создан <span class="count" id="cCreated">0</span>
+              </button>
+              <button class="chip" type="button" data-status="accepted" aria-pressed="false">
+                Принят <span class="count" id="cAccepted">0</span>
+              </button>
+              <button class="chip" type="button" data-status="inwork" aria-pressed="false">
+                В производстве <span class="count" id="cInWork">0</span>
+              </button>
+              <button class="chip" type="button" data-status="ready" aria-pressed="false">
+                Готов <span class="count" id="cReady">0</span>
+              </button>
+              <button class="chip" type="button" data-status="issued" aria-pressed="false">
+                Выдан <span class="count" id="cIssued">0</span>
+              </button>
+              <button class="chip" type="button" data-status="noshow" aria-pressed="false">
+                Не получен <span class="count" id="cNoShow">0</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="k"><span>Заказов в списке</span><span>шт.</span></div>
+              <div class="v" id="kpiTotal">0</div>
+            </div>
+            <div class="kpi">
+              <div class="k"><span>Активных</span><span>шт.</span></div>
+              <div class="v" id="kpiActive">0</div>
+            </div>
+            <div class="kpi">
+              <div class="k"><span>Готово к выдаче</span><span>шт.</span></div>
+              <div class="v" id="kpiReady">0</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;" class="grid3">
+            <button class="btn soft" id="clearBtn" type="button">Сбросить</button>
+            <button class="btn primary" id="applyBtn" type="button">Применить</button>
+            <button class="btn ghost" id="exportBtn" type="button">Выгрузить</button>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          <span>Действия: смена статуса заказа, просмотр состава, поиск</span>
+          <span>Выгрузка: CSV</span>
+        </div>
+      </section>
+
+      <!-- RIGHT: list + detail -->
+      <section class="card main-card">
+        <div class="card-h">
+          <div class="title">
+            <h1>Заказы текущего слота</h1>
+            <div class="main-actions">
+              <button class="btn ghost" id="prevBtn" type="button" title="Предыдущий заказ">Назад</button>
+              <button class="btn ghost" id="nextBtn" type="button" title="Следующий заказ">Вперёд</button>
+            </div>
+          </div>
+          <div class="sub">
+            <span class="badge" title="Очередь">
+              <span class="mini" aria-hidden="true" style="background:var(--warn); box-shadow:0 0 0 4px rgba(245,158,11,.14)"></span>
+              <span>Очередь: <b id="queuePill" style="font-family:var(--mono)">—</b></span>
+            </span>
+            <span class="badge" title="Период">
+              <span class="mini" aria-hidden="true" style="background:var(--info)"></span>
+              <span id="periodHint">—</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="split">
+          <div class="panel">
+            <div class="panel-h">
+              <strong>Список заказов</strong>
+              <span id="listHint">—</span>
+            </div>
+            <div class="list" id="ordersList" role="listbox" aria-label="Список заказов"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-h">
+              <strong>Карточка заказа</strong>
+              <span id="detailHint">Выберите заказ</span>
+            </div>
+            <div class="detail" id="detail">
+              <div class="head">
+                <div>
+                  <h3 id="dTitle">—</h3>
+                  <div class="small">
+                    <span>Создан: <b id="dCreated" style="font-family:var(--mono)">—</b></span>
+                    <span>Статус: <b id="dStatusText">—</b></span>
+                  </div>
+                </div>
+                <div id="dStatusBadge" class="status warn" title="Статус заказа">
+                  <span class="s-dot" aria-hidden="true"></span>
+                  <span id="dStatusBadgeText">—</span>
+                </div>
+              </div>
+
+              <div class="kv">
+                <div class="box">
+                  <div class="k">Дата</div>
+                  <div class="v" id="dDate">—</div>
+                </div>
+                <div class="box">
+                  <div class="k">Очередь</div>
+                  <div class="v" id="dQueue">—</div>
+                </div>
+              </div>
+
+              <div class="items" aria-label="Состав заказа">
+                <div class="items-h">
+                  <span>Состав заказа</span>
+                  <span id="dItemsCount">—</span>
+                </div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Позиция</th>
+                      <th style="width:110px;">Кол-во</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dItemsBody"></tbody>
+                </table>
+              </div>
+
+              <div style="margin-top:12px;">
+                <label for="dComment">Комментарий</label>
+                <input class="control" id="dComment" type="text" placeholder="—" disabled />
+              </div>
+
+              <div class="quick" style="margin-top:12px;">
+                <button class="btn big" id="toAcceptedBtn" type="button">Принять</button>
+                <button class="btn big" id="toInWorkBtn" type="button">В производство</button>
+                <button class="btn big primary" id="toReadyBtn" type="button">Готов</button>
+                <button class="btn big" id="toIssuedBtn" type="button">Выдан</button>
+              </div>
+
+              <div style="margin-top:10px;">
+                <button class="btn big ghost" id="toNoShowBtn" type="button">Не получен</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          <span>Смена статуса фиксируется системой для дальнейшей отчетности</span>
+          <span id="footerStats">—</span>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script>
+    // Данные соответствуют сущностям: Заказ, Позиция заказа, Статус заказа, Очередь заказов, Элемент очереди.
+    // Демонстрационные значения — только для работы экрана.
+    const STATUSES = [
+      { key:"created",  name:"Создан",         tone:"warn", order:10 },
+      { key:"accepted", name:"Принят",         tone:"info", order:20 },
+      { key:"inwork",   name:"В производстве", tone:"info", order:30 },
+      { key:"ready",    name:"Готов",          tone:"ok",   order:40 },
+      { key:"issued",   name:"Выдан",          tone:"ok",   order:50 },
+      { key:"noshow",   name:"Не получен",     tone:"bad",  order:60 }
+    ];
+
+    const SLOTS = [
+      { id: 1, name: "Завтрак", start:"08:30", end:"10:30", active:true },
+      { id: 2, name: "Обед",    start:"12:30", end:"17:00", active:true }
+    ];
+
+    const state = {
+      filters: {
+        date: null,
+        slotId: 2,
+        search: "",
+        status: "all"
+      },
+      selectedId: null,
+      orders: []
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function pad2(n){ return String(n).padStart(2,"0"); }
+    function fmtDateISO(d){
+      return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    }
+    function fmtDateRu(iso){
+      const [y,m,dd] = iso.split("-").map(Number);
+      return `${pad2(dd)}.${pad2(m)}.${y}`;
+    }
+    function fmtTime(hhmm){
+      return hhmm;
+    }
+    function nowTimeHHMM(){
+      const d = new Date();
+      return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    }
+
+    function makeDemoOrders(dateISO, slotId){
+      const base = dateISO.replaceAll("-","");
+      const mkId = (n) => `ORD-${base}-${String(n).padStart(5,"0")}`;
+
+      const sample = [
+        {
+          id: mkId(17),
+          dateISO,
+          createdAt: "12:34",
+          status: "created",
+          queueNo: 12,
+          comment: "",
+          items: [
+            { name:"Суп", qty:1 },
+            { name:"Горячее", qty:1 },
+            { name:"Гарнир", qty:1 }
+          ],
+          slotId
+        },
+        {
+          id: mkId(18),
+          dateISO,
+          createdAt: "12:35",
+          status: "accepted",
+          queueNo: 13,
+          comment: "",
+          items: [
+            { name:"Салат", qty:1 },
+            { name:"Горячее", qty:1 }
+          ],
+          slotId
+        },
+        {
+          id: mkId(19),
+          dateISO,
+          createdAt: "12:36",
+          status: "inwork",
+          queueNo: 14,
+          comment: "",
+          items: [
+            { name:"Суп", qty:1 },
+            { name:"Горячее", qty:1 },
+            { name:"Напиток", qty:1 }
+          ],
+          slotId
+        },
+        {
+          id: mkId(20),
+          dateISO,
+          createdAt: "12:37",
+          status: "ready",
+          queueNo: 15,
+          comment: "",
+          items: [
+            { name:"Горячее", qty:1 },
+            { name:"Гарнир", qty:1 }
+          ],
+          slotId
+        },
+        {
+          id: mkId(21),
+          dateISO,
+          createdAt: "12:38",
+          status: "ready",
+          queueNo: 16,
+          comment: "Без лука",
+          items: [
+            { name:"Салат", qty:1 },
+            { name:"Горячее", qty:1 },
+            { name:"Гарнир", qty:1 }
+          ],
+          slotId
+        },
+        {
+          id: mkId(22),
+          dateISO,
+          createdAt: "12:39",
+          status: "issued",
+          queueNo: 17,
+          comment: "",
+          items: [
+            { name:"Суп", qty:1 }
+          ],
+          slotId
+        }
+      ];
+
+      return sample;
+    }
+
+    function statusMeta(key){
+      return STATUSES.find(s => s.key === key) || STATUSES[0];
+    }
+
+    function setToast(title, text){
+      const t = $("toast");
+      t.innerHTML = `<strong>${title}</strong>${text}`;
+      t.style.display = "block";
+      clearTimeout(setToast._tm);
+      setToast._tm = setTimeout(()=> t.style.display="none", 2400);
+    }
+
+    function renderSlots(){
+      const sel = $("slotCtrl");
+      sel.innerHTML = "";
+      SLOTS.filter(s=>s.active).forEach(s=>{
+        const opt = document.createElement("option");
+        opt.value = String(s.id);
+        opt.textContent = `${s.name} (${fmtTime(s.start)}–${fmtTime(s.end)})`;
+        sel.appendChild(opt);
+      });
+      sel.value = String(state.filters.slotId);
+    }
+
+    function applyHeaderPills(){
+      $("todayPill").textContent = fmtDateRu(state.filters.date);
+      const slot = SLOTS.find(s=>s.id === Number(state.filters.slotId));
+      $("slotPill").textContent = slot ? slot.name : "—";
+      $("periodHint").textContent = slot ? `${fmtDateRu(state.filters.date)} • ${slot.name} ${slot.start}–${slot.end}` : "—";
+    }
+
+    function updateCounters(visibleOrders){
+      const counts = {
+        all: visibleOrders.length,
+        created: 0, accepted:0, inwork:0, ready:0, issued:0, noshow:0
+      };
+      for(const o of visibleOrders){
+        if(counts[o.status] !== undefined) counts[o.status]++;
+      }
+      $("cAll").textContent = String(counts.all);
+      $("cCreated").textContent = String(counts.created);
+      $("cAccepted").textContent = String(counts.accepted);
+      $("cInWork").textContent = String(counts.inwork);
+      $("cReady").textContent = String(counts.ready);
+      $("cIssued").textContent = String(counts.issued);
+      $("cNoShow").textContent = String(counts.noshow);
+
+      $("kpiTotal").textContent = String(visibleOrders.length);
+      const active = visibleOrders.filter(o => !["issued","noshow"].includes(o.status)).length;
+      $("kpiActive").textContent = String(active);
+      $("kpiReady").textContent = String(counts.ready);
+
+      const q = visibleOrders
+        .filter(o => o.queueNo != null)
+        .sort((a,b)=>a.queueNo-b.queueNo)
+        .map(o=>o.queueNo);
+      $("queuePill").textContent = q.length ? `${q[0]}…${q[q.length-1]}` : "—";
+      $("footerStats").textContent = `Активных: ${active} • Готово: ${counts.ready} • Выдано: ${counts.issued}`;
+    }
+
+    function filteredOrders(){
+      const { date, slotId, search, status } = state.filters;
+      let res = state.orders.filter(o => o.dateISO === date && o.slotId === Number(slotId));
+      if(search && search.trim()){
+        const q = search.trim().toUpperCase();
+        res = res.filter(o => o.id.toUpperCase().includes(q));
+      }
+      if(status !== "all"){
+        res = res.filter(o => o.status === status);
+      }
+      // сортировка по очереди (номер_в_очереди), затем по времени создания
+      res.sort((a,b)=>{
+        const qa = a.queueNo ?? 1e9;
+        const qb = b.queueNo ?? 1e9;
+        if(qa !== qb) return qa - qb;
+        return (a.createdAt || "").localeCompare(b.createdAt || "");
+      });
+      return res;
+    }
+
+    function renderList(){
+      const list = $("ordersList");
+      const orders = filteredOrders();
+      list.innerHTML = "";
+
+      $("listHint").textContent = `Показано: ${orders.length}`;
+
+      for(const o of orders){
+        const sm = statusMeta(o.status);
+        const el = document.createElement("div");
+        el.className = "order";
+        el.setAttribute("role","option");
+        el.setAttribute("tabindex","0");
+        el.dataset.id = o.id;
+        const selected = state.selectedId === o.id;
+        el.setAttribute("aria-selected", selected ? "true" : "false");
+
+        const statusToneClass = sm.tone === "ok" ? "ok" : (sm.tone === "bad" ? "bad" : (sm.tone === "warn" ? "warn" : ""));
+        const statusLabel = sm.name;
+
+        el.innerHTML = `
+          <div>
+            <div class="order-top">
+              <span class="oid">${o.id}</span>
+              <span class="status ${statusToneClass}">
+                <span class="s-dot" aria-hidden="true"></span>
+                <span>${statusLabel}</span>
+              </span>
+            </div>
+            <div class="meta">
+              <span>Создан: <b style="font-family:var(--mono)">${o.createdAt}</b></span>
+              <span>Очередь: <b style="font-family:var(--mono)">${o.queueNo ?? "—"}</b></span>
+              <span>Позиции: <b style="font-family:var(--mono)">${o.items.reduce((s,i)=>s+i.qty,0)}</b></span>
+            </div>
+          </div>
+          <div style="text-align:right; color:var(--muted); font-size:12px;">
+            <div>${fmtDateRu(o.dateISO)}</div>
+          </div>
+        `;
+
+        el.addEventListener("click", ()=> selectOrder(o.id));
+        el.addEventListener("keydown", (e)=>{
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            selectOrder(o.id);
+          }
+        });
+
+        list.appendChild(el);
+      }
+
+      updateCounters(orders);
+
+      if(!state.selectedId || !orders.some(o=>o.id === state.selectedId)){
+        state.selectedId = orders[0]?.id ?? null;
+      }
+      syncSelectionInList();
+      renderDetail();
+    }
+
+    function syncSelectionInList(){
+      const list = $("ordersList");
+      for(const el of list.querySelectorAll(".order")){
+        const isSel = el.dataset.id === state.selectedId;
+        el.setAttribute("aria-selected", isSel ? "true" : "false");
+      }
+    }
+
+    function selectOrder(id){
+      state.selectedId = id;
+      syncSelectionInList();
+      renderDetail();
+    }
+
+    function getSelected(){
+      return state.orders.find(o => o.id === state.selectedId) || null;
+    }
+
+    function setDetailStatusBadge(statusKey){
+      const sm = statusMeta(statusKey);
+      const b = $("dStatusBadge");
+      b.classList.remove("ok","warn","bad");
+      if(sm.tone === "ok") b.classList.add("ok");
+      else if(sm.tone === "bad") b.classList.add("bad");
+      else b.classList.add("warn");
+      $("dStatusBadgeText").textContent = sm.name;
+      $("dStatusText").textContent = sm.name;
+    }
+
+    function renderDetail(){
+      const o = getSelected();
+      if(!o){
+        $("detailHint").textContent = "Выберите заказ";
+        $("dTitle").textContent = "—";
+        $("dCreated").textContent = "—";
+        $("dDate").textContent = "—";
+        $("dQueue").textContent = "—";
+        $("dItemsCount").textContent = "—";
+        $("dItemsBody").innerHTML = "";
+        $("dComment").value = "";
+        setDetailStatusBadge("created");
+        setButtonsEnabled(false);
+        return;
+      }
+
+      $("detailHint").textContent = "Данные актуальны";
+      $("dTitle").textContent = o.id;
+      $("dCreated").textContent = o.createdAt;
+      $("dDate").textContent = fmtDateRu(o.dateISO);
+      $("dQueue").textContent = (o.queueNo ?? "—");
+      $("dComment").value = o.comment || "";
+
+      setDetailStatusBadge(o.status);
+
+      const totalItems = o.items.reduce((s,i)=>s+i.qty,0);
+      $("dItemsCount").textContent = `Итого позиций: ${totalItems}`;
+
+      const tbody = $("dItemsBody");
+      tbody.innerHTML = "";
+      for(const it of o.items){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(it.name)}</td>
+          <td class="qty">${it.qty}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      setButtonsEnabled(true);
+      refreshActionButtons(o.status);
+    }
+
+    function setButtonsEnabled(enabled){
+      ["toAcceptedBtn","toInWorkBtn","toReadyBtn","toIssuedBtn","toNoShowBtn","prevBtn","nextBtn"].forEach(id=>{
+        $(id).disabled = !enabled;
+        if(!enabled) $(id).setAttribute("aria-disabled","true");
+        else $(id).removeAttribute("aria-disabled");
+      });
+    }
+
+    function refreshActionButtons(statusKey){
+      // логика доступности действий по жизненному циклу статусов
+      const order = getSelected();
+      if(!order) return;
+
+      const can = {
+        accepted: ["created"],
+        inwork: ["created","accepted"],
+        ready: ["created","accepted","inwork"],
+        issued: ["ready"],
+        noshow: ["created","accepted","inwork","ready"]
+      };
+
+      $("toAcceptedBtn").disabled = !can.accepted.includes(statusKey);
+      $("toInWorkBtn").disabled = !can.inwork.includes(statusKey);
+      $("toReadyBtn").disabled = !can.ready.includes(statusKey);
+      $("toIssuedBtn").disabled = !can.issued.includes(statusKey);
+      $("toNoShowBtn").disabled = !can.noshow.includes(statusKey);
+
+      // если уже выдан/не получен — быстрые действия недоступны
+      if(["issued","noshow"].includes(statusKey)){
+        $("toAcceptedBtn").disabled = true;
+        $("toInWorkBtn").disabled = true;
+        $("toReadyBtn").disabled = true;
+        $("toIssuedBtn").disabled = true;
+        $("toNoShowBtn").disabled = true;
+      }
+    }
+
+    function changeStatus(newStatus){
+      const o = getSelected();
+      if(!o) return;
+      const prev = statusMeta(o.status).name;
+      o.status = newStatus;
+      renderList();
+      renderDetail();
+      setToast("Статус изменён", `${o.id}: ${prev} → ${statusMeta(newStatus).name}`);
+      $("lastUpdate").textContent = `обновлено ${nowTimeHHMM()}`;
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function setPressedStatusChip(key){
+      for(const btn of document.querySelectorAll(".chip[data-status]")){
+        const is = btn.dataset.status === key;
+        btn.setAttribute("aria-pressed", is ? "true" : "false");
+      }
+    }
+
+    function applyFilters(){
+      state.filters.date = $("dateCtrl").value;
+      state.filters.slotId = Number($("slotCtrl").value);
+      state.filters.search = $("searchCtrl").value || "";
+      applyHeaderPills();
+      renderList();
+      $("lastUpdate").textContent = `обновлено ${nowTimeHHMM()}`;
+    }
+
+    function resetFilters(){
+      const d = new Date();
+      state.filters.date = fmtDateISO(d);
+      state.filters.slotId = 2;
+      state.filters.search = "";
+      state.filters.status = "all";
+
+      $("dateCtrl").value = state.filters.date;
+      $("slotCtrl").value = String(state.filters.slotId);
+      $("searchCtrl").value = "";
+      setPressedStatusChip("all");
+
+      applyHeaderPills();
+      renderList();
+      $("lastUpdate").textContent = `обновлено ${nowTimeHHMM()}`;
+    }
+
+    function exportCSV(){
+      const orders = filteredOrders();
+      const rows = [];
+      rows.push(["Номер заказа","Дата","Создан","Статус","Очередь","Позиция","Количество"].join(";"));
+      for(const o of orders){
+        const st = statusMeta(o.status).name;
+        for(const it of o.items){
+          rows.push([
+            o.id,
+            fmtDateRu(o.dateISO),
+            o.createdAt,
+            st,
+            (o.queueNo ?? ""),
+            it.name,
+            it.qty
+          ].map(v => `"${String(v).replaceAll('"','""')}"`).join(";"));
+        }
+      }
+      const blob = new Blob([rows.join("\n")], {type:"text/csv;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `orders_${state.filters.date}_slot${state.filters.slotId}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setToast("Выгрузка готова", "Файл CSV сохранён в загрузки");
+    }
+
+    function moveSelection(delta){
+      const orders = filteredOrders();
+      if(!orders.length) return;
+      const idx = Math.max(0, orders.findIndex(o=>o.id === state.selectedId));
+      let next = idx + delta;
+      if(next < 0) next = 0;
+      if(next > orders.length-1) next = orders.length-1;
+      selectOrder(orders[next].id);
+      // прокрутка к выбранному
+      const el = $("ordersList").querySelector(`.order[data-id="${CSS.escape(orders[next].id)}"]`);
+      el?.scrollIntoView({block:"nearest"});
+    }
+
+    function finishNoShow(){
+      const date = state.filters.date;
+      const slotId = state.filters.slotId;
+      let changed = 0;
+      for(const o of state.orders){
+        if(o.dateISO === date && o.slotId === slotId){
+          if(["created","accepted","inwork","ready"].includes(o.status)){
+            o.status = "noshow";
+            changed++;
+          }
+        }
+      }
+      renderList();
+      renderDetail();
+      setToast("Завершение слота", changed ? `Не получен: ${changed} заказ(ов)` : "Нет активных заказов для завершения");
+      $("lastUpdate").textContent = `обновлено ${nowTimeHHMM()}`;
+    }
+
+    function init(){
+      renderSlots();
+
+      const today = fmtDateISO(new Date());
+      state.filters.date = today;
+      $("dateCtrl").value = today;
+      $("slotCtrl").value = String(state.filters.slotId);
+
+      // загрузка демонстрационных данных
+      state.orders = [
+        ...makeDemoOrders(today, 2),
+        ...makeDemoOrders(today, 1).map((o,i)=>({
+          ...o,
+          createdAt: `09:${pad2(10+i)}`,
+          status: ["created","accepted","inwork","ready"][i%4],
+          queueNo: 3+i
+        }))
+      ];
+
+      applyHeaderPills();
+      renderList();
+      $("lastUpdate").textContent = `обновлено ${nowTimeHHMM()}`;
+
+      // handlers
+      $("applyBtn").addEventListener("click", applyFilters);
+      $("clearBtn").addEventListener("click", resetFilters);
+      $("refreshBtn").addEventListener("click", ()=>{
+        // имитация обновления: только метка времени
+        $("lastUpdate").textContent = `обновлено ${nowTimeHHMM()}`;
+        setToast("Обновлено", "Список заказов актуализирован");
+      });
+      $("exportBtn").addEventListener("click", exportCSV);
+
+      $("dateCtrl").addEventListener("change", applyFilters);
+      $("slotCtrl").addEventListener("change", applyFilters);
+      $("searchCtrl").addEventListener("input", ()=>{
+        // легкий debounce
+        clearTimeout(init._deb);
+        init._deb = setTimeout(applyFilters, 180);
+      });
+
+      for(const btn of document.querySelectorAll(".chip[data-status]")){
+        btn.addEventListener("click", ()=>{
+          const key = btn.dataset.status;
+          state.filters.status = key;
+          setPressedStatusChip(key);
+          renderList();
+          $("lastUpdate").textContent = `обновлено ${nowTimeHHMM()}`;
+        });
+      }
+
+      $("toAcceptedBtn").addEventListener("click", ()=>changeStatus("accepted"));
+      $("toInWorkBtn").addEventListener("click", ()=>changeStatus("inwork"));
+      $("toReadyBtn").addEventListener("click", ()=>changeStatus("ready"));
+      $("toIssuedBtn").addEventListener("click", ()=>changeStatus("issued"));
+      $("toNoShowBtn").addEventListener("click", ()=>changeStatus("noshow"));
+
+      $("prevBtn").addEventListener("click", ()=>moveSelection(-1));
+      $("nextBtn").addEventListener("click", ()=>moveSelection(1));
+
+      $("markNoShowBtn").addEventListener("click", finishNoShow);
+
+      document.addEventListener("keydown", (e)=>{
+        if(e.key === "ArrowUp"){ moveSelection(-1); }
+        if(e.key === "ArrowDown"){ moveSelection(1); }
+      });
+
+      // Пиллы
+      $("todayPill").textContent = fmtDateRu(state.filters.date);
+      const slot = SLOTS.find(s=>s.id === state.filters.slotId);
+      $("slotPill").textContent = slot ? slot.name : "—";
+    }
+
+    init();
+  </script>
+</body>
+</html>

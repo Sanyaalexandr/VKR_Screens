@@ -1,0 +1,1305 @@
+<!doctype <htmlhtml>
+ <headlang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Отчет по посещаемости и потреблению</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --muted:#f6f7f8;
+      --text:#111318;
+      --sub:#5b6472;
+      --line:#e7e9ee;
+
+      --t-yellow:#ffdd2d;
+      --t-yellow-2:#ffd000;
+      --t-yellow-soft:#fff7cc;
+
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+
+      --shadow: 0 10px 30px rgba(17,19,24,.08);
+      --radius:16px;
+      --radius-sm:12px;
+      --focus: 0 0 0 4px rgba(255,221,45,.45);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 500px at 15% -10%, rgba(255,221,45,.30), transparent 55%),
+        radial-gradient(900px 420px at 105% 10%, rgba(255,208,0,.18), transparent 60%),
+        var(--bg);
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    button, input, select{ font:inherit; }
+    .app{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Topbar */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(255,255,255,.85);
+      backdrop-filter:saturate(140%) blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:260px;
+    }
+    .logo{
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(180deg, var(--t-yellow), var(--t-yellow-2));
+      box-shadow:0 8px 20px rgba(255,208,0,.25);
+      font-weight:900;
+      color:#111;
+      letter-spacing:.5px;
+    }
+    .brand__text{
+      display:flex;
+      flex-direction:column;
+      line-height:1.05;
+    }
+    .brand__name{
+      font-weight:800;
+      font-size:14px;
+    }
+    .brand__sub{
+      font-size:12px;
+      color:var(--sub);
+    }
+
+    .topbar__title{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .page-title{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .page-title h1{
+      margin:0;
+      font-size:16px;
+      font-weight:850;
+      letter-spacing:.1px;
+    }
+    .page-title .hint{
+      margin:0;
+      font-size:12px;
+      color:var(--sub);
+    }
+
+    .topbar__actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .btn{
+      border:1px solid var(--line);
+      background:var(--surface);
+      padding:10px 12px;
+      border-radius:12px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      cursor:pointer;
+      transition:transform .05s ease, box-shadow .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .btn:active{ transform:translateY(1px); }
+    .btn:focus{ outline:none; box-shadow:var(--focus); }
+    .btn--primary{
+      border-color:transparent;
+      background:linear-gradient(180deg, var(--t-yellow), var(--t-yellow-2));
+      font-weight:800;
+    }
+    .btn--ghost{
+      background:transparent;
+    }
+    .btn__icon{
+      width:18px; height:18px; display:inline-block;
+    }
+
+    /* Layout */
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      width:100%;
+      padding:18px;
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:18px;
+    }
+
+    .card{
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .card__head{
+      padding:14px 14px 10px 14px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .card__title{
+      margin:0;
+      font-size:14px;
+      font-weight:850;
+    }
+    .card__subtitle{
+      margin:4px 0 0 0;
+      font-size:12px;
+      color:var(--sub);
+    }
+    .card__body{
+      padding:14px;
+    }
+
+    /* Filters */
+    .filters{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .label{
+      font-size:12px;
+      color:var(--sub);
+      font-weight:700;
+    }
+    .control{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    input[type="date"], input[type="text"], select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      transition:box-shadow .2s ease, border-color .2s ease;
+    }
+    input[type="date"]:focus, input[type="text"]:focus, select:focus{
+      outline:none;
+      box-shadow:var(--focus);
+      border-color:rgba(255,208,0,.55);
+    }
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .chip{
+      border:1px solid var(--line);
+      background:var(--muted);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:750;
+      cursor:pointer;
+      transition:background .2s ease, border-color .2s ease;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .chip input{ display:none; }
+    .chip--on{
+      background:var(--t-yellow-soft);
+      border-color:rgba(255,208,0,.55);
+    }
+
+    .divider{
+      height:1px;
+      background:var(--line);
+      margin:4px 0;
+    }
+
+    .meta{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      padding:12px;
+      border-radius:14px;
+      background:linear-gradient(180deg, rgba(255,221,45,.20), rgba(255,221,45,.05));
+      border:1px dashed rgba(255,208,0,.55);
+    }
+    .meta-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      font-size:12px;
+      color:var(--sub);
+    }
+    .meta-row strong{
+      color:var(--text);
+      font-weight:900;
+    }
+
+    /* Main report */
+    .report{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .kpis{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:12px;
+    }
+    .kpi{
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:14px;
+      box-shadow:0 8px 18px rgba(17,19,24,.06);
+      position:relative;
+      overflow:hidden;
+    }
+    .kpi::before{
+      content:"";
+      position:absolute;
+      inset:-1px -1px auto -1px;
+      height:6px;
+      background:linear-gradient(90deg, var(--t-yellow), var(--t-yellow-2));
+    }
+    .kpi__name{
+      font-size:12px;
+      color:var(--sub);
+      font-weight:750;
+      margin:0;
+    }
+    .kpi__value{
+      margin:6px 0 0 0;
+      font-size:22px;
+      font-weight:950;
+      letter-spacing:-.2px;
+    }
+    .kpi__sub{
+      margin:6px 0 0 0;
+      font-size:12px;
+      color:var(--sub);
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:12px;
+    }
+
+    /* Charts */
+    .chart{
+      width:100%;
+      height:240px;
+      display:block;
+      border-radius:14px;
+      background:
+        linear-gradient(180deg, rgba(255,221,45,.10), transparent 55%),
+        #fff;
+      border:1px solid var(--line);
+      padding:10px;
+    }
+    .chart__head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:4px 6px 10px 6px;
+    }
+    .chart__title{
+      margin:0;
+      font-size:13px;
+      font-weight:900;
+    }
+    .chart__note{
+      font-size:12px;
+      color:var(--sub);
+      margin:0;
+      font-family:var(--mono);
+    }
+    .chart__canvas{
+      width:100%;
+      height:180px;
+      display:block;
+      background:rgba(255,255,255,.7);
+      border-radius:12px;
+      border:1px solid var(--line);
+    }
+
+    /* Tables */
+    .table-wrap{
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      font-size:13px;
+    }
+    thead th{
+      background:linear-gradient(180deg, rgba(255,221,45,.25), rgba(255,221,45,.08));
+      text-align:left;
+      padding:12px 12px;
+      font-size:12px;
+      color:#1b1f28;
+      border-bottom:1px solid var(--line);
+      font-weight:900;
+    }
+    tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      vertical-align:middle;
+    }
+    tbody tr:hover td{
+      background:rgba(255,221,45,.08);
+    }
+    tbody tr:last-child td{ border-bottom:none; }
+    .num{ text-align:right; font-variant-numeric: tabular-nums; font-family:var(--mono); }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:850;
+      border:1px solid var(--line);
+      background:var(--muted);
+    }
+    .dot{
+      width:8px; height:8px; border-radius:50%;
+      background:#9aa3af;
+    }
+    .badge--ok{ background:rgba(22,163,74,.08); border-color:rgba(22,163,74,.25); }
+    .badge--ok .dot{ background:var(--ok); }
+    .badge--warn{ background:rgba(245,158,11,.10); border-color:rgba(245,158,11,.28); }
+    .badge--warn .dot{ background:var(--warn); }
+    .badge--bad{ background:rgba(239,68,68,.10); border-color:rgba(239,68,68,.25); }
+    .badge--bad .dot{ background:var(--bad); }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:850;
+      background:var(--t-yellow-soft);
+      border:1px solid rgba(255,208,0,.55);
+    }
+
+    .footnote{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--sub);
+    }
+
+    /* Responsive */
+    @media (max-width: 1060px){
+      .container{ grid-template-columns:1fr; }
+      .brand{ min-width:auto; }
+      .kpis{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+      .grid2{ grid-template-columns:1fr; }
+    }
+  <body</style>
+</head>
+>
+<div class="app">
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <div class="logo" aria-label="Логотип">Т</div>
+        <div class="brand__text">
+          <div class="brand__name">Корпоративная столовая</div>
+          <div class="brand__sub">АО «ТБанк»</div>
+        </div>
+      </div>
+
+      <div class="topbar__title">
+        <div class="page-title">
+          <h1>Отчет по посещаемости и потреблению</h1>
+          <p class="hint" id="reportHint">Параметры не заданы</p>
+        </div>
+        <div class="topbar__actions">
+          <button class="btn btn--ghost" id="btnReset" type="button" title="Сбросить параметры">
+            <span class="btn__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M20 12a8 8 0 1 1-2.343-5.657" stroke="#111318" stroke-width="2" stroke-linecap="round"/>
+                <path d="M20 4v6h-6" stroke="#111318" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            Сброс
+          </button>
+          <button class="btn btn--primary" id="btnBuild" type="button" title="Сформировать отчет">
+            <span class="btn__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 19V5a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" stroke="#111318" stroke-width="2"/>
+                <path d="M14 3v6h6" stroke="#111318" stroke-width="2"/>
+                <path d="M8 13h8M8 17h8" stroke="#111318" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            Сформировать
+          </button>
+          <button class="btn" id="btnExport" type="button" title="Выгрузить отчет в файл">
+            <span class="btn__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 3v10" stroke="#111318" stroke-width="2" stroke-linecap="round"/>
+                <path d="M8 9l4 4 4-4" stroke="#111318" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="#111318" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            Выгрузить
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Left: Parameters -->
+    <section class="card" aria-label="Параметры формирования">
+      <div class="card__head">
+        <div>
+          <h2 class="card__title">Параметры формирования</h2>
+          <p class="card__subtitle">Период, слот и разрезы анализа</p>
+        </div>
+        <span class="pill" id="statusPill">Черновик</span>
+      </div>
+      <div class="card__body">
+        <form class="filters" id="filtersForm">
+          <div class="field">
+            <div class="label">Период</div>
+            <div class="control">
+              <input type="date" id="dateFrom" aria-label="Дата начала периода"/>
+              <span style="color:var(--sub); font-weight:800;">—</span>
+              <input type="date" id="dateTo" aria-label="Дата окончания периода"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="slotSelect">Слот питания</label>
+            <select id="slotSelect">
+              <option value="all">Все</option>
+              <option value="breakfast">Завтрак</option>
+              <option value="lunch">Обед</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="label">Разрезы анализа</div>
+            <div class="chips" id="dims">
+              <label class="chip chip--on" data-chip="byDay">
+                <input type="checkbox" id="dimDay" checked />
+                По дням
+              </label>
+              <label class="chip chip--on" data-chip="byDish">
+                <input type="checkbox" id="dimDish" checked />
+                По блюдам
+              </label>
+              <label class="chip chip--on" data-chip="byCategory">
+                <input type="checkbox" id="dimCategory" checked />
+                По категориям
+              </label>
+              <label class="chip chip--on" data-chip="byTime">
+                <input type="checkbox" id="dimTime" checked />
+                По времени
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="searchDish">Фильтр по наименованию блюда</label>
+            <input type="text" id="searchDish" placeholder="Например: суп" />
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="meta" aria-label="Сводка параметров">
+            <div class="meta-row"><span>Период</span><strong id="metaPeriod">—</strong></div>
+            <div class="meta-row"><span>Слот</span><strong id="metaSlot">—</strong></div>
+            <div class="meta-row"><span>Разрезы</span><strong id="metaDims">—</strong></div>
+          </div>
+
+          <div class="footnote">
+            Отчет строится на основании данных о заказах, фактах выдачи и событиях идентификации.
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Right: Report -->
+    <section class="report" aria-label="Содержимое отчета">
+      <section class="kpis" aria-label="Ключевые показатели">
+        <div class="kpi">
+          <p class="kpi__name">Заказано</p>
+          <p class="kpi__value" id="kpiOrdered">—</p>
+          <p class="kpi__sub" id="kpiOrderedSub">за период</p>
+        </div>
+        <div class="kpi">
+          <p class="kpi__name">Выдано</p>
+          <p class="kpi__value" id="kpiIssued">—</p>
+          <p class="kpi__sub" id="kpiIssuedSub">за период</p>
+        </div>
+        <div class="kpi">
+          <p class="kpi__name">Не получено</p>
+          <p class="kpi__value" id="kpiNoShow">—</p>
+          <p class="kpi__sub" id="kpiNoShowSub">доля: —</p>
+        </div>
+        <div class="kpi">
+          <p class="kpi__name">Идентификаций</p>
+          <p class="kpi__value" id="kpiIdent">—</p>
+          <p class="kpi__sub" id="kpiIdentSub">успешность: —</p>
+        </div>
+      </section>
+
+      <section class="grid2">
+        <div class="card">
+          <div class="card__head">
+            <div>
+              <h2 class="card__title">Динамика заказов и выдач</h2>
+              <p class="card__subtitle">Агрегация по дням (заказано vs выдано)</p>
+            </div>
+            <span class="badge badge--ok" id="badgePlanFact">
+              <span class="dot"></span>
+              План‑факт
+            </span>
+          </div>
+          <div class="card__body">
+            <div class="chart">
+              <div class="chart__head">
+                <p class="chart__title">Заказано / Выдано</p>
+                <p class="chart__note" id="chartRange">—</p>
+              </div>
+              <canvas class="chart__canvas" id="canvasTrend" width="900" height="360" aria-label="График динамики"></canvas>
+            </div>
+            <div class="footnote">Линии показывают количество заказов и количество подтвержденных выдач.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <div>
+              <h2 class="card__title">Пики нагрузки</h2>
+              <p class="card__subtitle">Распределение обращений по времени</p>
+            </div>
+            <span class="badge badge--warn" id="badgePeak">
+              <span class="dot"></span>
+              Нагрузка
+            </span>
+          </div>
+          <div class="card__body">
+            <div class="chart" style="height:240px;">
+              <div class="chart__head">
+                <p class="chart__title">Идентификации по интервалам</p>
+                <p class="chart__note" id="chartSlotNote">—</p>
+              </div>
+              <canvas class="chart__canvas" id="canvasPeak" width="900" height="360" aria-label="График пиков"></canvas>
+            </div>
+            <div class="footnote">Интервалы построены по времени событий идентификации.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="blockDishTable">
+        <div class="card__head">
+          <div>
+            <h2 class="card__title">Потребление по блюдам</h2>
+            <p class="card__subtitle">Агрегация: заказано, выдано, не получено</p>
+          </div>
+          <span class="badge badge--ok" id="badgeDish">
+            <span class="dot"></span>
+            Детализация
+          </span>
+        </div>
+        <div class="card__body">
+          <div class="table-wrap" role="region" aria-label="Таблица по блюдам">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:46%;">Блюдо</th>
+                  <th style="width:20%;">Категория</th>
+                  <th class="num" style="width:10%;">Заказано</th>
+                  <th class="num" style="width:10%;">Выдано</th>
+                  <th class="num" style="width:14%;">Не получено</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDish"></tbody>
+            </table>
+          </div>
+          <div class="footnote" id="dishFootnote">Фильтр применяется к наименованию блюда.</div>
+        </div>
+      </section>
+
+      <section class="card" id="blockCategoryTable">
+        <div class="card__head">
+          <div>
+            <h2 class="card__title">Итоги по категориям</h2>
+            <p class="card__subtitle">Структура потребления по категориям блюд</p>
+          </div>
+          <span class="badge badge--ok" id="badgeCategory">
+            <span class="dot"></span>
+            Структура
+          </span>
+        </div>
+        <div class="card__body">
+          <div class="table-wrap" role="region" aria-label="Таблица по категориям">
+            <table>
+              <thead>
+                <tr>
+                  <th>Категория</th>
+                  <th class="num">Заказано</th>
+                  <th class="num">Выдано</th>
+                  <th class="num">Не получено</th>
+                  <th class="num">Доля неполученных</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyCategory"></tbody>
+            </table>
+          </div>
+          <div class="footnote">Доля неполученных рассчитывается как (не получено / заказано).</div>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<script>
+  // ---------- Demo dataset (в рамках сущностей: заказ/выдача/идентификация, блюдо/категория, слот) ----------
+  const DATA = {
+    dishes: [
+      { id: 1, name: "Суп куриный", category: "Суп" },
+      { id: 2, name: "Салат овощной", category: "Салат" },
+      { id: 3, name: "Гречка", category: "Гарнир" },
+      { id: 4, name: "Котлета куриная", category: "Горячее" },
+      { id: 5, name: "Компот", category: "Напиток" },
+      { id: 6, name: "Паста", category: "Горячее" }
+    ],
+    days: [
+      // date, slot, ordered, issued, noshow, identTotal, identOk
+      { date: "2026-03-01", slot: "breakfast", ordered: 160, issued: 148, noshow: 12, identTotal: 155, identOk: 150 },
+      { date: "2026-03-02", slot: "breakfast", ordered: 182, issued: 173, noshow: 9,  identTotal: 180, identOk: 176 },
+      { date: "2026-03-03", slot: "breakfast", ordered: 170, issued: 158, noshow: 12, identTotal: 167, identOk: 160 },
+      { date: "2026-03-01", slot: "lunch",     ordered: 420, issued: 390, noshow: 30, identTotal: 410, identOk: 402 },
+      { date: "2026-03-02", slot: "lunch",     ordered: 455, issued: 421, noshow: 34, identTotal: 448, identOk: 439 },
+      { date: "2026-03-03", slot: "lunch",     ordered: 438, issued: 407, noshow: 31, identTotal: 430, identOk: 422 }
+    ],
+    // time distribution for identifications
+    peaks: {
+      breakfast: [
+        { label: "08:30", count: 28 },
+        { label: "09:00", count: 52 },
+        { label: "09:30", count: 61 },
+        { label: "10:00", count: 44 },
+        { label: "10:30", count: 19 }
+      ],
+      lunch: [
+        { label: "12:30", count: 62 },
+        { label: "13:00", count: 98 },
+        { label: "13:30", count: 115 },
+        { label: "14:00", count: 86 },
+        { label: "14:30", count: 55 },
+        { label: "15:00", count: 34 }
+      ],
+      all: [
+        { label: "08:30", count: 18 },
+        { label: "09:00", count: 40 },
+        { label: "09:30", count: 48 },
+        { label: "10:00", count: 32 },
+        { label: "12:30", count: 54 },
+        { label: "13:00", count: 84 },
+        { label: "13:30", count: 96 },
+        { label: "14:00", count: 70 },
+        { label: "14:30", count: 44 },
+        { label: "15:00", count: 28 }
+      ]
+    },
+    // aggregated by dish for the same 3 days (for demo)
+    dishAgg: [
+      { dishId: 1, ordered: 240, issued: 220, noshow: 20 },
+      { dishId: 2, ordered: 210, issued: 198, noshow: 12 },
+      { dishId: 3, ordered: 260, issued: 244, noshow: 16 },
+      { dishId: 4, ordered: 290, issued: 268, noshow: 22 },
+      { dishId: 5, ordered: 310, issued: 300, noshow: 10 },
+      { dishId: 6, ordered: 180, issued: 160, noshow: 20 }
+    ]
+  };
+
+  const el = (id) => document.getElementById(id);
+
+  const form = el("filtersForm");
+  const dateFrom = el("dateFrom");
+  const dateTo = el("dateTo");
+  const slotSelect = el("slotSelect");
+  const searchDish = el("searchDish");
+
+  const reportHint = el("reportHint");
+  const statusPill = el("statusPill");
+
+  const metaPeriod = el("metaPeriod");
+  const metaSlot = el("metaSlot");
+  const metaDims = el("metaDims");
+
+  const kpiOrdered = el("kpiOrdered");
+  const kpiIssued = el("kpiIssued");
+  const kpiNoShow = el("kpiNoShow");
+  const kpiIdent = el("kpiIdent");
+  const kpiNoShowSub = el("kpiNoShowSub");
+  const kpiIdentSub = el("kpiIdentSub");
+
+  const chartRange = el("chartRange");
+  const chartSlotNote = el("chartSlotNote");
+
+  const tbodyDish = el("tbodyDish");
+  const tbodyCategory = el("tbodyCategory");
+
+  const blockDishTable = el("blockDishTable");
+  const blockCategoryTable = el("blockCategoryTable");
+
+  const btnBuild = el("btnBuild");
+  const btnReset = el("btnReset");
+  const btnExport = el("btnExport");
+
+  const dims = [
+    { id:"dimDay", label:"По дням", block:null },
+    { id:"dimDish", label:"По блюдам", block:blockDishTable },
+    { id:"dimCategory", label:"По категориям", block:blockCategoryTable },
+    { id:"dimTime", label:"По времени", block:null }
+  ];
+
+  function setChipStates(){
+    dims.forEach(d=>{
+      const cb = el(d.id);
+      const chip = cb.closest(".chip");
+      chip.classList.toggle("chip--on", cb.checked);
+    });
+  }
+
+  function fmtInt(n){
+    return new Intl.NumberFormat("ru-RU").format(n);
+  }
+
+  function fmtPct(x){
+    if (!isFinite(x)) return "—";
+    return (x*100).toFixed(1).replace(".", ",") + "%";
+  }
+
+  function getSlotLabel(v){
+    if (v==="breakfast") return "Завтрак";
+    if (v==="lunch") return "Обед";
+    return "Все";
+  }
+
+  function withinRange(d, from, to){
+    if (!from && !to) return true;
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    return true;
+  }
+
+  function applyVisibility(){
+    dims.forEach(d=>{
+      if (!d.block) return;
+      d.block.style.display = el(d.id).checked ? "" : "none";
+    });
+  }
+
+  function updateMeta(){
+    const f = dateFrom.value;
+    const t = dateTo.value;
+    metaPeriod.textContent = (f || t) ? `${f || "…"} — ${t || "…"}` : "Не задан";
+    metaSlot.textContent = getSlotLabel(slotSelect.value);
+
+    const enabled = dims
+      .filter(d => el(d.id).checked)
+      .map(d => d.label);
+    metaDims.textContent = enabled.length ? enabled.join(", ") : "Не выбраны";
+
+    reportHint.textContent = `Период: ${metaPeriod.textContent} • Слот: ${metaSlot.textContent}`;
+  }
+
+  function buildCategoryAgg(rows){
+    const map = new Map();
+    for (const r of rows){
+      const dish = DATA.dishes.find(x=>x.id===r.dishId);
+      const cat = dish?.category || "—";
+      if (!map.has(cat)) map.set(cat, { category: cat, ordered:0, issued:0, noshow:0 });
+      const acc = map.get(cat);
+      acc.ordered += r.ordered;
+      acc.issued += r.issued;
+      acc.noshow += r.noshow;
+    }
+    return [...map.values()].sort((a,b)=> b.ordered - a.ordered);
+  }
+
+  function renderDishTable(){
+    const q = (searchDish.value || "").trim().toLowerCase();
+
+    const rows = DATA.dishAgg
+      .map(r => {
+        const dish = DATA.dishes.find(x=>x.id===r.dishId);
+        return {
+          dish: dish?.name || "—",
+          category: dish?.category || "—",
+          ordered: r.ordered,
+          issued: r.issued,
+          noshow: r.noshow
+        };
+      })
+      .filter(r => !q || r.dish.toLowerCase().includes(q))
+      .sort((a,b)=> b.ordered - a.ordered);
+
+    tbodyDish.innerHTML = rows.map(r => `
+      <tr>
+        <td>${escapeHtml(r.dish)}</td>
+        <td><span class="badge"><span class="dot"></span>${escapeHtml(r.category)}</span></td>
+        <td class="num">${fmtInt(r.ordered)}</td>
+        <td class="num">${fmtInt(r.issued)}</td>
+        <td class="num">${fmtInt(r.noshow)}</td>
+      </tr>
+    `).join("");
+
+    el("dishFootnote").textContent = q ? `Показаны позиции по фильтру: «${q}».` : "Фильтр применяется к наименованию блюда.";
+    return rows;
+  }
+
+  function renderCategoryTable(dishRowsOriginalAgg){
+    const dishAggRows = dishRowsOriginalAgg.map(r=>{
+      const dish = DATA.dishes.find(x=>x.name===r.dish);
+      const dishId = dish?.id;
+      // Restore to original structure with ids is not needed; compute from names/categories:
+      return { category: r.category, ordered:r.ordered, issued:r.issued, noshow:r.noshow };
+    });
+
+    const map = new Map();
+    for (const r of dishAggRows){
+      const cat = r.category || "—";
+      if (!map.has(cat)) map.set(cat, { category: cat, ordered:0, issued:0, noshow:0 });
+      const acc = map.get(cat);
+      acc.ordered += r.ordered;
+      acc.issued += r.issued;
+      acc.noshow += r.noshow;
+    }
+    const cats = [...map.values()].sort((a,b)=> b.ordered - a.ordered);
+
+    tbodyCategory.innerHTML = cats.map(c=>{
+      const share = c.ordered > 0 ? (c.noshow / c.ordered) : NaN;
+      return `
+        <tr>
+          <td>${escapeHtml(c.category)}</td>
+          <td class="num">${fmtInt(c.ordered)}</td>
+          <td class="num">${fmtInt(c.issued)}</td>
+          <td class="num">${fmtInt(c.noshow)}</td>
+          <td class="num">${fmtPct(share)}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function getFilteredDays(){
+    const f = dateFrom.value || null;
+    const t = dateTo.value || null;
+    const slot = slotSelect.value;
+
+    return DATA.days.filter(r => {
+      if (slot !== "all" && r.slot !== slot) return false;
+      return withinRange(r.date, f, t);
+    }).sort((a,b)=> a.date.localeCompare(b.date));
+  }
+
+  function computeKpis(days){
+    const sum = (k) => days.reduce((acc,r)=> acc + (r[k]||0), 0);
+    const ordered = sum("ordered");
+    const issued = sum("issued");
+    const noshow = sum("noshow");
+    const identTotal = sum("identTotal");
+    const identOk = sum("identOk");
+
+    return { ordered, issued, noshow, identTotal, identOk };
+  }
+
+  function renderKpis(k){
+    kpiOrdered.textContent = fmtInt(k.ordered);
+    kpiIssued.textContent = fmtInt(k.issued);
+    kpiNoShow.textContent = fmtInt(k.noshow);
+    kpiIdent.textContent = fmtInt(k.identTotal);
+
+    const noshowShare = k.ordered ? (k.noshow / k.ordered) : NaN;
+    kpiNoShowSub.textContent = `доля: ${fmtPct(noshowShare)}`;
+
+    const okRate = k.identTotal ? (k.identOk / k.identTotal) : NaN;
+    kpiIdentSub.textContent = `успешность: ${fmtPct(okRate)}`;
+
+    // status pill
+    statusPill.textContent = "Сформирован";
+  }
+
+  function drawTrend(days){
+    const canvas = el("canvasTrend");
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    // padding
+    const padL=46, padR=16, padT=16, padB=36;
+    const iw = W - padL - padR;
+    const ih = H - padT - padB;
+
+    // axes background grid
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0,0,W,H);
+
+    const maxY = Math.max(1, ...days.map(d=>Math.max(d.ordered,d.issued)));
+    const gridLines = 4;
+
+    // grid
+    ctx.strokeStyle = "rgba(17,19,24,.10)";
+    ctx.lineWidth = 1;
+    for (let i=0;i<=gridLines;i++){
+      const y = padT + (ih * (i/gridLines));
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(W-padR, y);
+      ctx.stroke();
+    }
+
+    // y labels
+    ctx.fillStyle = "rgba(91,100,114,.95)";
+    ctx.font = "12px " + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    for (let i=0;i<=gridLines;i++){
+      const val = Math.round(maxY * (1 - i/gridLines));
+      const y = padT + (ih * (i/gridLines));
+      ctx.fillText(String(val), padL-8, y);
+    }
+
+    // x labels
+    const n = days.length || 1;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    const every = Math.max(1, Math.ceil(n/6));
+    for (let i=0;i<n;i++){
+      if (i % every !== 0 && i !== n-1) continue;
+      const x = padL + (iw * (n===1 ? 0.5 : i/(n-1)));
+      const label = days[i].date.slice(5); // MM-DD
+      ctx.fillText(label, x, padT + ih + 10);
+    }
+
+    function yScale(v){
+      return padT + ih * (1 - (v/maxY));
+    }
+    function xScale(i){
+      return padL + (iw * (n===1 ? 0.5 : i/(n-1)));
+    }
+
+    // area for ordered (soft yellow)
+    ctx.beginPath();
+    days.forEach((d,i)=>{
+      const x = xScale(i);
+      const y = yScale(d.ordered);
+      if (i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
+    });
+    ctx.lineTo(xScale(n-1), padT+ih);
+    ctx.lineTo(xScale(0), padT+ih);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0,padT,0,padT+ih);
+    grad.addColorStop(0, "rgba(255,221,45,.35)");
+    grad.addColorStop(1, "rgba(255,221,45,.06)");
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // lines
+    drawLine(days.map(d=>d.ordered), "rgba(255,208,0,1)", 3);
+    drawLine(days.map(d=>d.issued), "rgba(17,19,24,.85)", 2);
+
+    // legend
+    const lx = W - padR - 210, ly = padT + 8;
+    ctx.fillStyle = "rgba(255,255,255,.95)";
+    roundRect(ctx, lx, ly, 200, 56, 12);
+    ctx.fill();
+    ctx.strokeStyle="rgba(17,19,24,.10)";
+    ctx.stroke();
+
+    ctx.fillStyle="#111318";
+    ctx.font="12px " + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign="left";
+    ctx.textBaseline="middle";
+
+    // ordered
+    ctx.strokeStyle="rgba(255,208,0,1)";
+    ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(lx+14, ly+18); ctx.lineTo(lx+44, ly+18); ctx.stroke();
+    ctx.fillText("Заказано", lx+54, ly+18);
+
+    // issued
+    ctx.strokeStyle="rgba(17,19,24,.85)";
+    ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(lx+14, ly+38); ctx.lineTo(lx+44, ly+38); ctx.stroke();
+    ctx.fillText("Выдано", lx+54, ly+38);
+
+    function drawLine(values, color, width){
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      values.forEach((v,i)=>{
+        const x = xScale(i);
+        const y = yScale(v);
+        if (i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+
+      // points
+      ctx.fillStyle = color;
+      values.forEach((v,i)=>{
+        const x = xScale(i);
+        const y = yScale(v);
+        ctx.beginPath();
+        ctx.arc(x,y,4,0,Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle="#fff";
+        ctx.lineWidth=2;
+        ctx.stroke();
+      });
+    }
+  }
+
+  function drawPeak(slot){
+    const canvas = el("canvasPeak");
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    const padL=32, padR=16, padT=14, padB=34;
+    const iw = W - padL - padR;
+    const ih = H - padT - padB;
+
+    ctx.fillStyle="#fff";
+    ctx.fillRect(0,0,W,H);
+
+    const series = DATA.peaks[slot] || DATA.peaks.all;
+    const maxY = Math.max(1, ...series.map(s=>s.count));
+    const n = series.length || 1;
+
+    // grid baseline
+    ctx.strokeStyle="rgba(17,19,24,.10)";
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(padL, padT+ih);
+    ctx.lineTo(W-padR, padT+ih);
+    ctx.stroke();
+
+    const barW = iw / n;
+    for (let i=0;i<n;i++){
+      const x = padL + i*barW + 6;
+      const w = Math.max(10, barW - 12);
+      const h = (series[i].count/maxY) * (ih-6);
+      const y = padT + ih - h;
+
+      const g = ctx.createLinearGradient(0,y,0,y+h);
+      g.addColorStop(0, "rgba(255,221,45,.95)");
+      g.addColorStop(1, "rgba(255,208,0,.75)");
+      ctx.fillStyle = g;
+      roundRect(ctx, x, y, w, h, 10);
+      ctx.fill();
+
+      // labels
+      ctx.fillStyle="rgba(91,100,114,.95)";
+      ctx.font="12px " + getComputedStyle(document.body).fontFamily;
+      ctx.textAlign="center";
+      ctx.textBaseline="top";
+      ctx.fillText(series[i].label, x + w/2, padT+ih + 8);
+    }
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    const rr = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr, y);
+    ctx.arcTo(x+w, y, x+w, y+h, rr);
+    ctx.arcTo(x+w, y+h, x, y+h, rr);
+    ctx.arcTo(x, y+h, x, y, rr);
+    ctx.arcTo(x, y, x+w, y, rr);
+    ctx.closePath();
+  }
+
+  function refresh(){
+    setChipStates();
+    applyVisibility();
+    updateMeta();
+
+    const days = getFilteredDays();
+    const k = computeKpis(days);
+
+    // KPIs and charts depend on "byDay"/"byTime" toggles but shown regardless; values are still OK
+    const f = dateFrom.value || "…";
+    const t = dateTo.value || "…";
+    chartRange.textContent = `${f} — ${t}`;
+    chartSlotNote.textContent = getSlotLabel(slotSelect.value);
+
+    renderKpis(k);
+    drawTrend(days.length ? days : [{date:"—", ordered:0, issued:0}]);
+    drawPeak(slotSelect.value);
+
+    const dishRows = renderDishTable();
+    renderCategoryTable(dishRows);
+  }
+
+  function reset(){
+    // default dates from demo
+    dateFrom.value = "2026-03-01";
+    dateTo.value = "2026-03-03";
+    slotSelect.value = "all";
+    searchDish.value = "";
+
+    el("dimDay").checked = true;
+    el("dimDish").checked = true;
+    el("dimCategory").checked = true;
+    el("dimTime").checked = true;
+
+    statusPill.textContent = "Черновик";
+    refresh();
+  }
+
+  function exportCsv(){
+    const enabledDish = el("dimDish").checked;
+    const enabledCategory = el("dimCategory").checked;
+
+    const lines = [];
+    lines.push(["Отчет по посещаемости и потреблению"].join(";"));
+    lines.push([`Период`, metaPeriod.textContent].join(";"));
+    lines.push([`Слот`, metaSlot.textContent].join(";"));
+    lines.push([""].join(";"));
+
+    lines.push(["Показатели", "Значение"].join(";"));
+    lines.push(["Заказано", kpiOrdered.textContent].join(";"));
+    lines.push(["Выдано", kpiIssued.textContent].join(";"));
+    lines.push(["Не получено", kpiNoShow.textContent].join(";"));
+    lines.push(["Идентификаций", kpiIdent.textContent].join(";"));
+    lines.push([""].join(";"));
+
+    if (enabledDish){
+      lines.push(["По блюдам"].join(";"));
+      lines.push(["Блюдо","Категория","Заказано","Выдано","Не получено"].join(";"));
+      [...tbodyDish.querySelectorAll("tr")].forEach(tr=>{
+        const tds=[...tr.querySelectorAll("td")].map(td=>td.textContent.trim());
+        lines.push([tds[0], tds[1].replace(/\s+/g," ").trim(), tds[2], tds[3], tds[4]].join(";"));
+      });
+      lines.push([""].join(";"));
+    }
+
+    if (enabledCategory){
+      lines.push(["По категориям"].join(";"));
+      lines.push(["Категория","Заказано","Выдано","Не получено","Доля неполученных"].join(";"));
+      [...tbodyCategory.querySelectorAll("tr")].forEach(tr=>{
+        const tds=[...tr.querySelectorAll("td")].map(td=>td.textContent.trim());
+        lines.push([tds[0], tds[1], tds[2], tds[3], tds[4]].join(";"));
+      });
+    }
+
+    const csv = "\uFEFF" + lines.join("\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "otchet_poseshaemost_i_potreblenie.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // events
+  document.getElementById("dims").addEventListener("click", (e)=>{
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    const cb = chip.querySelector("input[type=checkbox]");
+    cb.checked = !cb.checked;
+    statusPill.textContent = "Черновик";
+    refresh();
+  });
+
+  [dateFrom, dateTo, slotSelect, searchDish].forEach(ctrl=>{
+    ctrl.addEventListener("input", ()=>{
+      statusPill.textContent = "Черновик";
+      refresh();
+    });
+    ctrl.addEventListener("change", ()=>{
+      statusPill.textContent = "Черновик";
+      refresh();
+    });
+  });
+
+  btnBuild.addEventListener("click", ()=>{
+    statusPill.textContent = "Сформирован";
+    refresh();
+  });
+
+  btnReset.addEventListener("click", reset);
+  btnExport.addEventListener("click", exportCsv);
+
+  // init
+  reset();
+</script>
+</body>
+</html>

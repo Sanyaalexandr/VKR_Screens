@@ -1,0 +1,1114 @@
+<!doctype <htmlhtml>
+ <headlang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Черновик заявки на закупку</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --surface-2:#fff7cc;
+      --text:#111111;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --shadow: 0 10px 30px rgba(17,17,17,.08);
+
+      --t-yellow:#ffd100;
+      --t-yellow-2:#ffdf4d;
+      --t-yellow-soft:#fff3b0;
+
+      --ok:#0f9d58;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+
+      --focus: 0 0 0 4px rgba(255,209,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --radius-xs: 10px;
+
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(255,209,0,.22), transparent 60%),
+        radial-gradient(900px 600px at 90% 0%, rgba(255,209,0,.12), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      font-family:var(--font);
+    }
+
+    a{color:inherit}
+    .app{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Topbar */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:saturate(1.2) blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+    .topbar__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:260px;
+    }
+    .logo{
+      width:40px;height:40px;
+      border-radius:14px;
+      background:linear-gradient(135deg, var(--t-yellow), var(--t-yellow-2));
+      display:grid;place-items:center;
+      box-shadow:0 10px 20px rgba(255,209,0,.35);
+      border:1px solid rgba(17,17,17,.08);
+      flex:0 0 auto;
+    }
+    .logo span{
+      font-weight:900;
+      font-size:22px;
+      letter-spacing:.5px;
+    }
+    .brand__text{
+      display:flex;
+      flex-direction:column;
+      line-height:1.15;
+    }
+    .brand__title{
+      font-weight:800;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .brand__subtitle{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .topbar__actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background:var(--surface);
+      color:var(--muted);
+      font-size:12px;
+      max-width:100%;
+    }
+    .chip strong{color:var(--text); font-weight:700}
+    .mono{font-family:var(--mono)}
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--warn);
+      box-shadow:0 0 0 4px rgba(245,158,11,.14);
+      flex:0 0 auto;
+    }
+
+    /* Layout */
+    main{
+      flex:1 1 auto;
+    }
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      padding:18px 18px 26px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+    }
+
+    /* Cards */
+    .card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card__head{
+      padding:16px 16px 12px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      background:linear-gradient(180deg, rgba(255,209,0,.16), rgba(255,209,0,.00));
+    }
+    .card__title{
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .card__desc{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      max-width:72ch;
+    }
+    .card__body{padding:16px}
+
+    /* Form */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.25fr 1.25fr .9fr 1.35fr;
+      gap:12px;
+    }
+    @media (max-width: 1050px){
+      .grid{grid-template-columns: 1fr 1fr}
+    }
+    @media (max-width: 620px){
+      .grid{grid-template-columns: 1fr}
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    label{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .control{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:11px 12px;
+      font-size:14px;
+      background:#fff;
+      outline:none;
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    .control:focus{
+      border-color: rgba(255,209,0,.75);
+      box-shadow: var(--focus);
+    }
+    .control[disabled]{
+      background:#fafafa;
+      color:#9ca3af;
+      cursor:not-allowed;
+    }
+    .helper{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .statusPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--surface);
+      font-size:13px;
+      color:var(--text);
+      white-space:nowrap;
+    }
+    .statusPill .badge{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--warn);
+      box-shadow: 0 0 0 4px rgba(245,158,11,.14);
+    }
+
+    /* Alerts */
+    .alert{
+      border-radius:var(--radius-sm);
+      border:1px solid var(--border);
+      background: #fff;
+      padding:12px 12px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .alert__icon{
+      width:28px;height:28px;border-radius:10px;
+      display:grid;place-items:center;
+      background:var(--t-yellow-soft);
+      border:1px solid rgba(17,17,17,.08);
+      flex:0 0 auto;
+      font-weight:900;
+    }
+    .alert__text{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .alert__title{font-weight:800; font-size:13px}
+    .alert__desc{color:var(--muted); font-size:12px; line-height:1.35}
+    .alert--warn .alert__icon{background:rgba(245,158,11,.15)}
+    .alert--bad .alert__icon{background:rgba(239,68,68,.14)}
+    .alert--ok .alert__icon{background:rgba(15,157,88,.14)}
+    .alert--bad{border-color: rgba(239,68,68,.35)}
+    .alert--warn{border-color: rgba(245,158,11,.35)}
+    .alert--ok{border-color: rgba(15,157,88,.35)}
+
+    /* Table */
+    .tableWrap{
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:#fff;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      font-size:13px;
+    }
+    thead th{
+      text-align:left;
+      padding:12px 12px;
+      color:var(--muted);
+      font-weight:800;
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,209,0,.14), rgba(255,209,0,.04));
+    }
+    tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      background:#fff;
+    }
+    tbody tr:hover td{
+      background: rgba(255,209,0,.08);
+    }
+    tbody tr:last-child td{border-bottom:none}
+    .cell-muted{color:var(--muted)}
+    .cell-right{text-align:right}
+    .cell-center{text-align:center}
+    .cell-nowrap{white-space:nowrap}
+    .rowFlag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .flagDot{
+      width:8px;height:8px;border-radius:50%;
+      background:transparent;
+      border:2px solid var(--border);
+    }
+    .flagDot.bad{background:var(--bad); border-color:var(--bad)}
+    .flagDot.warn{background:var(--warn); border-color:var(--warn)}
+    .flagDot.ok{background:var(--ok); border-color:var(--ok)}
+
+    .qty{
+      width:130px;
+      text-align:right;
+      font-variant-numeric: tabular-nums;
+    }
+    .comment{
+      width:100%;
+      min-width:180px;
+    }
+    .tiny{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
+    /* Footer actions */
+    .actionsBar{
+      position:sticky;
+      bottom:0;
+      z-index:5;
+      margin-top:10px;
+      padding:12px;
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.92);
+      backdrop-filter:saturate(1.2) blur(10px);
+      box-shadow: 0 10px 30px rgba(17,17,17,.10);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .actionsLeft, .actionsRight{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:1px solid rgba(17,17,17,.10);
+      background:#fff;
+      border-radius:14px;
+      padding:10px 12px;
+      font-weight:800;
+      font-size:13px;
+      cursor:pointer;
+      transition: transform .05s ease, box-shadow .15s ease, border-color .15s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn:focus{outline:none; box-shadow: var(--focus)}
+    .btn--primary{
+      background: linear-gradient(135deg, var(--t-yellow), var(--t-yellow-2));
+      border-color: rgba(17,17,17,.12);
+    }
+    .btn--ghost{
+      background:#fff;
+    }
+    .btn--danger{
+      background: rgba(239,68,68,.08);
+      border-color: rgba(239,68,68,.30);
+      color:#991b1b;
+    }
+    .kbd{
+      font-family:var(--mono);
+      font-size:11px;
+      padding:2px 6px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--muted);
+    }
+
+    .summary{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .summary strong{color:var(--text)}
+    .divider{
+      width:1px;height:18px;background:var(--border);
+    }
+    .pillMini{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+
+    /* Modal */
+    .modalOverlay{
+      position:fixed; inset:0;
+      background:rgba(17,17,17,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:50;
+    }
+    .modal{
+      width:min(720px, 100%);
+      background:#fff;
+      border-radius:18px;
+      border:1px solid rgba(255,209,0,.35);
+      box-shadow: 0 25px 70px rgba(17,17,17,.22);
+      overflow:hidden;
+    }
+    .modal__head{
+      padding:14px 14px 10px;
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,209,0,.18), rgba(255,209,0,.02));
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .modal__title{
+      margin:0;
+      font-size:15px;
+      font-weight:900;
+    }
+    .modal__body{
+      padding:14px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+      max-height:60vh;
+      overflow:auto;
+      white-space:pre-wrap;
+      font-family:var(--mono);
+      background:#fff;
+    }
+    .modal__foot{
+      padding:12px 14px;
+      border-top:1px solid var(--border);
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      background:#fff;
+    }
+
+    .srOnly{
+      position:absolute !important;
+      height:1px;width:1px;
+      overflow:hidden;
+      clip:rect(1px,1px,1px,1px);
+      white-space:nowrap;
+    }
+  <body</style>
+</head>
+
+>
+<div class="app">
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>Т</span></div>
+        <div class="brand__text">
+          <div class="brand__title">ИС корпоративной столовой</div>
+          <div class="brand__subtitle">Закупки · Черновик заявки</div>
+        </div>
+      </div>
+
+      <div class="topbar__actions">
+        <div class="chip" title="Идентификатор документа">
+          <span class="dot" aria-hidden="true"></span>
+          <span>Документ:</span>
+          <strong class="mono" id="docId">PR-202604-01</strong>
+        </div>
+        <div class="chip" title="Статус документа">
+          <span>Статус:</span>
+          <strong id="docStatusText">Черновик</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <section class="card" aria-labelledby="h1">
+        <div class="card__head">
+          <div>
+            <h1 class="card__title" id="h1">Черновик заявки на закупку (просмотр/редактирование)</h1>
+            <p class="card__desc">
+              Документ формируется на период закупки, содержит перечень сырья и расчетные количества.
+              Допускается корректировка количества и комментариев по строкам, затем — утверждение и выгрузка.
+            </p>
+          </div>
+
+          <div class="statusPill" title="Текущее состояние документа">
+            <span class="badge" id="statusBadge" aria-hidden="true"></span>
+            <span id="statusLabel">Черновик</span>
+          </div>
+        </div>
+
+        <div class="card__body">
+          <div class="grid" role="form" aria-label="Параметры документа">
+            <div class="field">
+              <label for="periodStart">Период закупки — начало</label>
+              <input class="control" id="periodStart" type="date" />
+            </div>
+
+            <div class="field">
+              <label for="periodEnd">Период закупки — окончание</label>
+              <input class="control" id="periodEnd" type="date" />
+            </div>
+
+            <div class="field">
+              <label for="createdAt">Дата и время формирования</label>
+              <input class="control" id="createdAt" type="text" disabled />
+            </div>
+
+            <div class="field">
+              <label for="contract">Договор поставки</label>
+              <select class="control" id="contract">
+                <option value="" selected>Не выбран</option>
+                <option value="CNT-001">Договор № 15/24 от 2024-02-01</option>
+                <option value="CNT-002">Договор № 07/25 от 2025-01-15</option>
+              </select>
+              <div class="helper">Выбор договора фиксируется в документе.</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px; display:grid; grid-template-columns: 1.2fr 1fr; gap:12px;">
+            <div class="alert alert--warn" id="qualityAlert">
+              <div class="alert__icon" aria-hidden="true">!</div>
+              <div class="alert__text">
+                <div class="alert__title">Контроль данных</div>
+                <div class="alert__desc" id="qualityText">В документе есть строки, требующие внимания.</div>
+              </div>
+            </div>
+
+            <div class="alert alert--ok" id="autosaveAlert">
+              <div class="alert__icon" aria-hidden="true">i</div>
+              <div class="alert__text">
+                <div class="alert__title">Автосохранение</div>
+                <div class="alert__desc" id="autosaveText">Изменений нет.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <div class="field" style="min-width:280px; flex:1 1 340px;">
+              <label for="search">Поиск по строкам</label>
+              <input class="control" id="search" type="search" placeholder="Введите часть наименования" />
+            </div>
+
+            <div class="field" style="min-width:220px; flex:0 0 auto;">
+              <label for="filterIssues">Показать</label>
+              <select class="control" id="filterIssues">
+                <option value="all" selected>Все строки</option>
+                <option value="issues">Требуют внимания</option>
+                <option value="ok">Без замечаний</option>
+              </select>
+            </div>
+
+            <div class="field" style="min-width:220px; flex:0 0 auto;">
+              <label for="groupView">Группировка</label>
+              <select class="control" id="groupView">
+                <option value="none" selected>Без группировки</option>
+                <option value="uom">По единицам</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;" class="tableWrap" aria-label="Табличная часть документа">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:46%;">Номенклатура</th>
+                  <th style="width:14%;">Единица</th>
+                  <th style="width:14%;" class="cell-right">Количество</th>
+                  <th style="width:26%;">Комментарий</th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+
+          <div class="tiny" id="hint">
+            Подсказка: <span class="kbd">Ctrl</span> + <span class="kbd">S</span> — сохранить изменения, <span class="kbd">Ctrl</span> + <span class="kbd">E</span> — выгрузить.
+          </div>
+        </div>
+      </section>
+
+      <div class="actionsBar" aria-label="Панель действий">
+        <div class="actionsLeft">
+          <button class="btn btn--ghost" id="btnRecalc" type="button" title="Вернуть количества к расчетным">
+            Сбросить корректировки
+          </button>
+          <button class="btn btn--danger" id="btnClearComments" type="button" title="Очистить комментарии во всех строках">
+            Очистить комментарии
+          </button>
+        </div>
+
+        <div class="summary" aria-live="polite">
+          <span class="pillMini">Позиции: <strong id="sumLines">0</strong></span>
+          <span class="divider" aria-hidden="true"></span>
+          <span class="pillMini">Требуют внимания: <strong id="sumIssues">0</strong></span>
+          <span class="divider" aria-hidden="true"></span>
+          <span class="pillMini">Последнее сохранение: <strong id="lastSaved">—</strong></span>
+        </div>
+
+        <div class="actionsRight">
+          <button class="btn btn--ghost" id="btnSave" type="button">
+            Сохранить <span class="kbd">Ctrl S</span>
+          </button>
+          <button class="btn btn--ghost" id="btnExport" type="button">
+            Выгрузить
+          </button>
+          <button class="btn btn--primary" id="btnApprove" type="button">
+            Утвердить
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="modalOverlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal__head">
+        <div>
+          <h2 class="modal__title" id="modalTitle">Выгрузка</h2>
+          <div class="helper" id="modalSubtitle">Содержимое выгрузки (CSV).</div>
+        </div>
+        <button class="btn btn--ghost" id="btnCloseModal" type="button">Закрыть</button>
+      </div>
+      <div class="modal__body" id="modalBody"></div>
+      <div class="modal__foot">
+        <button class="btn btn--primary" id="btnCopy" type="button">Скопировать</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Данные соответствуют сущностям "Заявка на закупку" + "Строка заявки" + "Сырьё" + "Единица измерения" + "Договор поставки"
+  const state = {
+    id: "PR-202604-01",
+    status: "Черновик",
+    periodStart: "2026-04-01",
+    periodEnd: "2026-04-30",
+    createdAt: new Date().toLocaleString("ru-RU"),
+    contractId: "",
+
+    // строки: количество + комментарий (как в ER), плюс отображаемые атрибуты связанных справочников (наименование, единица)
+    rows: [
+      { id: "L-001", itemName: "Молоко пастеризованное", uom: "л", qty: 120, comment: "" },
+      { id: "L-002", itemName: "Куриное филе", uom: "кг", qty: 85, comment: "" },
+      { id: "L-003", itemName: "Рис", uom: "кг", qty: 60, comment: "Проверить остатки перед заказом" },
+      { id: "L-004", itemName: "Огурцы свежие", uom: "кг", qty: 0, comment: "" },
+      { id: "L-005", itemName: "Соль", uom: "кг", qty: 5, comment: "" }
+    ],
+    baseRows: null,
+    dirty: false,
+    lastSaved: null
+  };
+
+  state.baseRows = structuredClone(state.rows);
+
+  const el = (id) => document.getElementById(id);
+
+  const docId = el("docId");
+  const docStatusText = el("docStatusText");
+  const statusLabel = el("statusLabel");
+  const statusBadge = el("statusBadge");
+
+  const periodStart = el("periodStart");
+  const periodEnd = el("periodEnd");
+  const createdAt = el("createdAt");
+  const contract = el("contract");
+
+  const tbody = el("rows");
+  const search = el("search");
+  const filterIssues = el("filterIssues");
+  const groupView = el("groupView");
+
+  const qualityAlert = el("qualityAlert");
+  const qualityText = el("qualityText");
+  const autosaveText = el("autosaveText");
+
+  const sumLines = el("sumLines");
+  const sumIssues = el("sumIssues");
+  const lastSaved = el("lastSaved");
+
+  const btnSave = el("btnSave");
+  const btnExport = el("btnExport");
+  const btnApprove = el("btnApprove");
+  const btnRecalc = el("btnRecalc");
+  const btnClearComments = el("btnClearComments");
+
+  const modalOverlay = el("modalOverlay");
+  const modalBody = el("modalBody");
+  const btnCloseModal = el("btnCloseModal");
+  const btnCopy = el("btnCopy");
+
+  function setStatus(s){
+    state.status = s;
+    docStatusText.textContent = s;
+    statusLabel.textContent = s;
+
+    let color = "warn";
+    if (s === "Утверждена") color = "ok";
+    if (s === "Черновик") color = "warn";
+
+    statusBadge.style.background = (color === "ok") ? "var(--ok)" : (color === "warn") ? "var(--warn)" : "var(--bad)";
+    statusBadge.style.boxShadow = (color === "ok") ? "0 0 0 4px rgba(15,157,88,.14)"
+      : (color === "warn") ? "0 0 0 4px rgba(245,158,11,.14)"
+      : "0 0 0 4px rgba(239,68,68,.14)";
+  }
+
+  function fmtQty(v){
+    const n = Number(v);
+    if (!Number.isFinite(n)) return "";
+    return n.toLocaleString("ru-RU", { maximumFractionDigits: 3 });
+  }
+
+  function parseQty(v){
+    const s = String(v ?? "").trim().replace(/\s/g,"").replace(",",".");
+    if (s === "") return NaN;
+    const n = Number(s);
+    return n;
+  }
+
+  function rowIssueLevel(r){
+    // Контроль "аномалий": ноль/отрицательное количество, пустая номенклатура, слишком большое значение.
+    const qty = Number(r.qty);
+    if (!r.itemName) return "bad";
+    if (!Number.isFinite(qty)) return "bad";
+    if (qty < 0) return "bad";
+    if (qty === 0) return "warn";
+    if (qty > 10000) return "warn";
+    return "ok";
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function currentViewRows(){
+    const q = search.value.trim().toLowerCase();
+    let list = state.rows.filter(r => r.itemName.toLowerCase().includes(q));
+
+    const f = filterIssues.value;
+    if (f === "issues"){
+      list = list.filter(r => rowIssueLevel(r) !== "ok");
+    } else if (f === "ok"){
+      list = list.filter(r => rowIssueLevel(r) === "ok");
+    }
+
+    if (groupView.value === "uom"){
+      const groups = new Map();
+      for (const r of list){
+        const key = r.uom || "—";
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(r);
+      }
+      return { grouped: true, groups };
+    }
+
+    return { grouped: false, list };
+  }
+
+  function render(){
+    docId.textContent = state.id;
+    periodStart.value = state.periodStart;
+    periodEnd.value = state.periodEnd;
+    createdAt.value = state.createdAt;
+    contract.value = state.contractId;
+
+    const view = currentViewRows();
+
+    let html = "";
+    let issuesCount = 0;
+
+    if (!view.grouped){
+      for (const r of view.list){
+        const level = rowIssueLevel(r);
+        if (level !== "ok") issuesCount++;
+
+        html += `
+          <tr data-id="${escapeHtml(r.id)}">
+            <td>
+              <div style="display:flex; gap:10px; align-items:flex-start;">
+                <div class="rowFlag" title="${level === 'ok' ? 'Без замечаний' : level === 'warn' ? 'Требует внимания' : 'Ошибка'}">
+                  <span class="flagDot ${level}"></span>
+                </div>
+                <div style="min-width:0;">
+                  <div style="font-weight:900; line-height:1.25;">${escapeHtml(r.itemName)}</div>
+                  <div class="cell-muted" style="margin-top:2px;">Строка: <span class="mono">${escapeHtml(r.id)}</span></div>
+                </div>
+              </div>
+            </td>
+            <td class="cell-nowrap">${escapeHtml(r.uom || "—")}</td>
+            <td class="cell-right">
+              <input class="control qty" inputmode="decimal" aria-label="Количество" value="${escapeHtml(fmtQty(r.qty))}" data-role="qty" ${state.status === "Утверждена" ? "disabled" : ""}>
+            </td>
+            <td>
+              <input class="control comment" aria-label="Комментарий" value="${escapeHtml(r.comment || "")}" data-role="comment" ${state.status === "Утверждена" ? "disabled" : ""}>
+            </td>
+          </tr>
+        `;
+      }
+    } else {
+      for (const [uom, rows] of view.groups.entries()){
+        html += `
+          <tr>
+            <td colspan="4" style="background:rgba(255,209,0,.10); color:var(--muted); font-weight:900;">
+              Единица: ${escapeHtml(uom)} · Строк: ${rows.length}
+            </td>
+          </tr>
+        `;
+        for (const r of rows){
+          const level = rowIssueLevel(r);
+          if (level !== "ok") issuesCount++;
+
+          html += `
+            <tr data-id="${escapeHtml(r.id)}">
+              <td>
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                  <div class="rowFlag" title="${level === 'ok' ? 'Без замечаний' : level === 'warn' ? 'Требует внимания' : 'Ошибка'}">
+                    <span class="flagDot ${level}"></span>
+                  </div>
+                  <div style="min-width:0;">
+                    <div style="font-weight:900; line-height:1.25;">${escapeHtml(r.itemName)}</div>
+                    <div class="cell-muted" style="margin-top:2px;">Строка: <span class="mono">${escapeHtml(r.id)}</span></div>
+                  </div>
+                </div>
+              </td>
+              <td class="cell-nowrap">${escapeHtml(r.uom || "—")}</td>
+              <td class="cell-right">
+                <input class="control qty" inputmode="decimal" aria-label="Количество" value="${escapeHtml(fmtQty(r.qty))}" data-role="qty" ${state.status === "Утверждена" ? "disabled" : ""}>
+              </td>
+              <td>
+                <input class="control comment" aria-label="Комментарий" value="${escapeHtml(r.comment || "")}" data-role="comment" ${state.status === "Утверждена" ? "disabled" : ""}>
+              </td>
+            </tr>
+          `;
+        }
+      }
+    }
+
+    tbody.innerHTML = html || `<tr><td colspan="4" class="cell-muted">Нет строк по выбранным условиям.</td></tr>`;
+
+    // Итоги
+    const totalLines = state.rows.length;
+    const totalIssues = state.rows.reduce((acc, r) => acc + (rowIssueLevel(r) === "ok" ? 0 : 1), 0);
+    sumLines.textContent = String(totalLines);
+    sumIssues.textContent = String(totalIssues);
+
+    // Алерты
+    if (totalIssues === 0){
+      qualityAlert.classList.remove("alert--warn","alert--bad");
+      qualityAlert.classList.add("alert--ok");
+      qualityText.textContent = "Замечаний по строкам нет.";
+      qualityAlert.querySelector(".alert__icon").textContent = "✓";
+    } else {
+      const hasBad = state.rows.some(r => rowIssueLevel(r) === "bad");
+      qualityAlert.classList.remove("alert--ok","alert--warn","alert--bad");
+      qualityAlert.classList.add(hasBad ? "alert--bad" : "alert--warn");
+      qualityText.textContent = hasBad
+        ? "Есть ошибки в данных строк (проверьте количество)."
+        : "Есть строки, требующие внимания (например, нулевое количество).";
+      qualityAlert.querySelector(".alert__icon").textContent = hasBad ? "×" : "!";
+    }
+
+    lastSaved.textContent = state.lastSaved ? state.lastSaved : "—";
+    autosaveText.textContent = state.dirty ? "Есть несохраненные изменения." : "Изменений нет.";
+
+    // Кнопки
+    const locked = state.status === "Утверждена";
+    btnApprove.disabled = locked;
+    btnRecalc.disabled = locked;
+    btnClearComments.disabled = locked;
+    btnSave.disabled = locked ? true : !state.dirty;
+
+    [btnApprove, btnRecalc, btnClearComments, btnSave].forEach(b=>{
+      b.style.opacity = b.disabled ? .55 : 1;
+      b.style.cursor = b.disabled ? "not-allowed" : "pointer";
+    });
+  }
+
+  function markDirty(){
+    if (state.status === "Утверждена") return;
+    state.dirty = true;
+    render();
+  }
+
+  function attachTableHandlers(){
+    tbody.addEventListener("input", (e) => {
+      const input = e.target;
+      const tr = input.closest("tr[data-id]");
+      if (!tr) return;
+      const id = tr.getAttribute("data-id");
+      const row = state.rows.find(r => r.id === id);
+      if (!row) return;
+
+      if (input.dataset.role === "qty"){
+        const n = parseQty(input.value);
+        row.qty = Number.isFinite(n) ? n : row.qty;
+        markDirty();
+        // не перерисовываем сразу, чтобы не сбивать курсор; только обновим индикатор качества через debounce
+        scheduleSoftRender();
+      }
+
+      if (input.dataset.role === "comment"){
+        row.comment = input.value;
+        markDirty();
+      }
+    });
+
+    tbody.addEventListener("blur", (e) => {
+      const input = e.target;
+      if (!input || input.tagName !== "INPUT") return;
+
+      if (input.dataset.role === "qty"){
+        // нормализуем отображение количества
+        const tr = input.closest("tr[data-id]");
+        if (!tr) return;
+        const id = tr.getAttribute("data-id");
+        const row = state.rows.find(r => r.id === id);
+        if (!row) return;
+        input.value = fmtQty(row.qty);
+        scheduleSoftRender(true);
+      }
+    }, true);
+  }
+
+  let softTimer = null;
+  function scheduleSoftRender(force=false){
+    clearTimeout(softTimer);
+    softTimer = setTimeout(() => {
+      // мягкая перерисовка: только пересчёт итогов/алертов/доступности, но проще сделать полный render
+      render();
+    }, force ? 0 : 200);
+  }
+
+  function save(){
+    if (state.status === "Утверждена") return;
+    state.dirty = false;
+    state.lastSaved = new Date().toLocaleString("ru-RU");
+    render();
+  }
+
+  function exportCsv(){
+    const header = ["Номенклатура","Единица","Количество","Комментарий"];
+    const lines = [header.join(";")];
+
+    for (const r of state.rows){
+      const line = [
+        `"${String(r.itemName).replaceAll('"','""')}"`,
+        `"${String(r.uom ?? "").replaceAll('"','""')}"`,
+        String(r.qty).replace(".", ","),
+        `"${String(r.comment ?? "").replaceAll('"','""')}"`
+      ];
+      lines.push(line.join(";"));
+    }
+
+    const meta = [
+      `Документ: ${state.id}`,
+      `Статус: ${state.status}`,
+      `Период: ${state.periodStart} — ${state.periodEnd}`,
+      `Сформирован: ${state.createdAt}`,
+      `Договор: ${state.contractId || "—"}`
+    ].join("\n");
+
+    const csv = meta + "\n\n" + lines.join("\n");
+
+    el("modalTitle").textContent = "Выгрузка (CSV)";
+    el("modalSubtitle").textContent = "Скопируйте содержимое и сохраните в файл.";
+    modalBody.textContent = csv;
+
+    modalOverlay.style.display = "flex";
+  }
+
+  function closeModal(){
+    modalOverlay.style.display = "none";
+  }
+
+  function approve(){
+    if (state.status === "Утверждена") return;
+
+    const hasBad = state.rows.some(r => rowIssueLevel(r) === "bad");
+    if (hasBad){
+      // нельзя утвердить при ошибках (логика формы)
+      qualityAlert.classList.remove("alert--ok","alert--warn");
+      qualityAlert.classList.add("alert--bad");
+      qualityAlert.querySelector(".alert__icon").textContent = "×";
+      qualityText.textContent = "Утверждение недоступно: устраните ошибки в строках (проверьте количество).";
+      return;
+    }
+
+    // при "warn" (например, нули) разрешаем, но это управленческое решение; оставим подтверждение
+    setStatus("Утверждена");
+    state.dirty = false;
+    state.lastSaved = new Date().toLocaleString("ru-RU");
+    render();
+  }
+
+  function resetToBase(){
+    if (state.status === "Утверждена") return;
+    state.rows = structuredClone(state.baseRows);
+    state.dirty = true;
+    render();
+  }
+
+  function clearAllComments(){
+    if (state.status === "Утверждена") return;
+    for (const r of state.rows) r.comment = "";
+    state.dirty = true;
+    render();
+  }
+
+  function init(){
+    setStatus(state.status);
+
+    periodStart.value = state.periodStart;
+    periodEnd.value = state.periodEnd;
+    createdAt.value = state.createdAt;
+
+    periodStart.addEventListener("change", () => { state.periodStart = periodStart.value; markDirty(); });
+    periodEnd.addEventListener("change", () => { state.periodEnd = periodEnd.value; markDirty(); });
+    contract.addEventListener("change", () => { state.contractId = contract.value; markDirty(); });
+
+    search.addEventListener("input", render);
+    filterIssues.addEventListener("change", render);
+    groupView.addEventListener("change", render);
+
+    btnSave.addEventListener("click", save);
+    btnExport.addEventListener("click", exportCsv);
+    btnApprove.addEventListener("click", approve);
+    btnRecalc.addEventListener("click", resetToBase);
+    btnClearComments.addEventListener("click", clearAllComments);
+
+    btnCloseModal.addEventListener("click", closeModal);
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modalOverlay.style.display === "flex") closeModal();
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s"){
+        e.preventDefault();
+        if (!btnSave.disabled) save();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "e"){
+        e.preventDefault();
+        exportCsv();
+      }
+    });
+
+    btnCopy.addEventListener("click", async () => {
+      try{
+        await navigator.clipboard.writeText(modalBody.textContent || "");
+        btnCopy.textContent = "Скопировано";
+        setTimeout(() => btnCopy.textContent = "Скопировать", 1100);
+      }catch{
+        btnCopy.textContent = "Не удалось";
+        setTimeout(() => btnCopy.textContent = "Скопировать", 1100);
+      }
+    });
+
+    attachTableHandlers();
+    render();
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,1024 @@
+<!doctype <htmlhtml>
+ <headlang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Мой заказ — корпоративная столовая</title>
+  <style>
+    :root{
+      --t-yellow:#FFDD2D;
+      --t-yellow-2:#FFE86A;
+      --t-black:#111111;
+      --t-text:#1b1b1b;
+      --t-muted:#6b7280;
+      --t-border:#e7e7ea;
+      --t-bg:#f6f7fb;
+      --t-card:#ffffff;
+      --t-shadow: 0 14px 40px rgba(17,17,17,.08);
+      --t-radius:18px;
+      --t-radius-sm:12px;
+      --t-focus: 0 0 0 3px rgba(255, 221, 45, .45);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      color:var(--t-text);
+      background:
+        radial-gradient(1200px 800px at 20% -10%, rgba(255,221,45,.35), transparent 55%),
+        radial-gradient(900px 600px at 105% 15%, rgba(255,221,45,.20), transparent 50%),
+        var(--t-bg);
+    }
+
+    /* ======= TEST CONTROLS (outside form, to not попадали на скрин) ======= */
+    .test-panel{
+      position:fixed;
+      left:16px;
+      bottom:16px;
+      z-index:50;
+      width:min(520px, calc(100% - 32px));
+      background:rgba(255,255,255,.92);
+      backdrop-filter: blur(8px);
+      border:1px solid var(--t-border);
+      border-radius:14px;
+      box-shadow: 0 16px 40px rgba(17,17,17,.12);
+      padding:12px;
+    }
+    .test-panel__title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:700;
+      font-size:13px;
+      color:#2c2c2c;
+      margin-bottom:8px;
+    }
+    .test-panel__badge{
+      width:26px;height:26px;
+      border-radius:8px;
+      display:grid;place-items:center;
+      background: linear-gradient(180deg, var(--t-yellow), var(--t-yellow-2));
+      border:1px solid rgba(17,17,17,.08);
+      font-weight:900;
+      color:var(--t-black);
+      letter-spacing:.02em;
+    }
+    .test-panel__row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .btn{
+      appearance:none;
+      border:1px solid rgba(17,17,17,.12);
+      background:#fff;
+      color:var(--t-black);
+      border-radius:12px;
+      padding:9px 10px;
+      font-weight:650;
+      font-size:13px;
+      cursor:pointer;
+      transition: transform .04s ease, box-shadow .12s ease, background .12s ease;
+      user-select:none;
+    }
+    .btn:hover{background:#fcfcfd}
+    .btn:active{transform: translateY(1px)}
+    .btn:focus{outline:none; box-shadow: var(--t-focus)}
+    .btn--primary{
+      background: linear-gradient(180deg, var(--t-yellow), var(--t-yellow-2));
+      border-color: rgba(17,17,17,.12);
+    }
+    .btn--danger{
+      background:#fff;
+      border-color: rgba(239,68,68,.35);
+      color:#b42318;
+    }
+    .btn--ghost{
+      background:transparent;
+      border-color: rgba(17,17,17,.14);
+    }
+
+    /* ======= PAGE LAYOUT ======= */
+    .wrap{
+      min-height:100%;
+      display:grid;
+      place-items:center;
+      padding:34px 16px 90px; /* нижний отступ чтобы не перекрывалось тест-панелью */
+    }
+
+    .screen{
+      width:min(980px, 100%);
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    @media (max-width: 880px){
+      .screen{grid-template-columns: 1fr; gap:14px}
+    }
+
+    /* ======= HEADER CARD ======= */
+    .card{
+      background:var(--t-card);
+      border:1px solid var(--t-border);
+      border-radius: var(--t-radius);
+      box-shadow: var(--t-shadow);
+      overflow:hidden;
+    }
+
+    .card__header{
+      padding:16px 18px;
+      background:
+        linear-gradient(90deg, rgba(255,221,45,.55), rgba(255,221,45,.15)),
+        #fff;
+      border-bottom: 1px solid rgba(17,17,17,.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .logo{
+      width:38px;height:38px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background: linear-gradient(180deg, var(--t-yellow), var(--t-yellow-2));
+      border:1px solid rgba(17,17,17,.10);
+      box-shadow: 0 10px 24px rgba(255,221,45,.25);
+      font-weight:950;
+      color:var(--t-black);
+      font-size:18px;
+      flex:0 0 auto;
+    }
+    .brand__meta{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .brand__title{
+      margin:0;
+      font-size:16px;
+      line-height:1.2;
+      font-weight:850;
+      letter-spacing:.01em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand__subtitle{
+      margin:0;
+      font-size:12.5px;
+      color:var(--t-muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      background:#fff;
+      border:1px solid rgba(17,17,17,.10);
+      border-radius:999px;
+      box-shadow: 0 6px 18px rgba(17,17,17,.06);
+      font-size:12.5px;
+      font-weight:650;
+      color:#2a2a2a;
+      flex:0 0 auto;
+    }
+    .chip__dot{
+      width:10px;height:10px;border-radius:999px;
+      background:#9ca3af;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.9);
+    }
+
+    /* ======= MAIN ORDER CARD ======= */
+    .card__body{padding:16px 18px}
+    .grid-2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 520px){
+      .grid-2{grid-template-columns:1fr}
+    }
+
+    .field{
+      border:1px solid rgba(17,17,17,.08);
+      background: #fff;
+      border-radius:14px;
+      padding:12px 12px;
+    }
+    .field__label{
+      font-size:12px;
+      color:var(--t-muted);
+      margin:0 0 6px;
+    }
+    .field__value{
+      font-size:14px;
+      font-weight:800;
+      margin:0;
+      color:#111;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(17,17,17,.10);
+      background: #fff;
+      font-size:12.5px;
+      font-weight:750;
+      color:#1f2937;
+    }
+    .pill__dot{
+      width:9px;height:9px;border-radius:999px;
+      background:#9ca3af;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.9);
+    }
+    .pill--yellow{
+      background: rgba(255,221,45,.25);
+      border-color: rgba(255,221,45,.55);
+    }
+    .pill--green{
+      background: rgba(34,197,94,.12);
+      border-color: rgba(34,197,94,.25);
+    }
+    .pill--red{
+      background: rgba(239,68,68,.10);
+      border-color: rgba(239,68,68,.22);
+    }
+    .pill--blue{
+      background: rgba(59,130,246,.10);
+      border-color: rgba(59,130,246,.22);
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin:14px 0 10px;
+    }
+    .section-title h2{
+      margin:0;
+      font-size:14px;
+      font-weight:900;
+      letter-spacing:.01em;
+    }
+    .muted{
+      color:var(--t-muted);
+      font-size:12.5px;
+      font-weight:650;
+    }
+
+    .items{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .item{
+      border:1px solid rgba(17,17,17,.08);
+      border-radius: 16px;
+      padding:12px;
+      background:
+        linear-gradient(180deg, rgba(255,221,45,.10), transparent 40%),
+        #fff;
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+    }
+
+    .item__name{
+      margin:0;
+      font-weight:900;
+      font-size:14px;
+      color:#111;
+      line-height:1.25;
+    }
+    .item__meta{
+      margin:6px 0 0;
+      color:var(--t-muted);
+      font-size:12.5px;
+      font-weight:650;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .kcal{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(17,17,17,.08);
+      background:#fff;
+      font-size:12px;
+      font-weight:800;
+      color:#111;
+      white-space:nowrap;
+      height:fit-content;
+    }
+    .qty{
+      min-width:46px;
+      height:34px;
+      padding:0 10px;
+      border-radius:12px;
+      border:1px solid rgba(17,17,17,.10);
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:950;
+      color:#111;
+    }
+
+    .rule{
+      margin-top:12px;
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(17,17,17,.08);
+      background: #fff;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .rule__icon{
+      width:34px;height:34px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background: rgba(255,221,45,.35);
+      border:1px solid rgba(255,221,45,.55);
+      color:#111;
+      font-weight:950;
+      flex:0 0 auto;
+    }
+    .rule__text{
+      margin:0;
+      font-size:12.5px;
+      color:#374151;
+      line-height:1.35;
+      font-weight:650;
+    }
+
+    /* ======= SIDE CARD (queue/progress) ======= */
+    .side{
+      position:sticky;
+      top:16px;
+    }
+    @media (max-width: 880px){
+      .side{position:relative; top:auto}
+    }
+
+    .progress{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .big{
+      border:1px solid rgba(17,17,17,.08);
+      border-radius:18px;
+      padding:14px;
+      background:#fff;
+    }
+    .big__top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .big__title{
+      margin:0;
+      font-size:13px;
+      color:var(--t-muted);
+      font-weight:750;
+    }
+    .big__value{
+      margin:6px 0 0;
+      font-size:20px;
+      font-weight:950;
+      letter-spacing:.02em;
+      color:#111;
+      line-height:1.1;
+    }
+    .hint{
+      margin:8px 0 0;
+      font-size:12.5px;
+      color:var(--t-muted);
+      font-weight:650;
+      line-height:1.35;
+    }
+
+    .steps{
+      border:1px solid rgba(17,17,17,.08);
+      border-radius:18px;
+      padding:14px;
+      background:#fff;
+    }
+    .steps__title{
+      margin:0 0 10px;
+      font-size:14px;
+      font-weight:900;
+    }
+    .step{
+      display:flex;
+      gap:10px;
+      padding:10px 0;
+      border-top:1px dashed rgba(17,17,17,.12);
+    }
+    .step:first-of-type{border-top:none; padding-top:0}
+    .step__dot{
+      width:14px;height:14px;border-radius:999px;
+      margin-top:2px;
+      background:#e5e7eb;
+      border:1px solid rgba(17,17,17,.10);
+      flex:0 0 auto;
+    }
+    .step__dot--done{
+      background: rgba(34,197,94,.15);
+      border-color: rgba(34,197,94,.25);
+      box-shadow: inset 0 0 0 3px rgba(34,197,94,.22);
+    }
+    .step__dot--active{
+      background: rgba(255,221,45,.55);
+      border-color: rgba(255,221,45,.65);
+      box-shadow: inset 0 0 0 3px rgba(255,221,45,.25);
+    }
+    .step__dot--fail{
+      background: rgba(239,68,68,.10);
+      border-color: rgba(239,68,68,.25);
+      box-shadow: inset 0 0 0 3px rgba(239,68,68,.12);
+    }
+    .step__text{
+      min-width:0;
+    }
+    .step__name{
+      margin:0;
+      font-weight:900;
+      font-size:13.5px;
+      color:#111;
+    }
+    .step__time{
+      margin:4px 0 0;
+      font-size:12.5px;
+      font-weight:650;
+      color:var(--t-muted);
+    }
+
+    .divider{
+      height:1px;
+      background: rgba(17,17,17,.08);
+      margin:14px 0;
+    }
+
+    .summary{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border:1px solid rgba(17,17,17,.08);
+      border-radius:18px;
+      padding:14px;
+      background:
+        linear-gradient(90deg, rgba(255,221,45,.22), rgba(255,221,45,.06)),
+        #fff;
+    }
+    .summary__label{
+      margin:0;
+      font-size:12.5px;
+      color:var(--t-muted);
+      font-weight:750;
+    }
+    .summary__value{
+      margin:6px 0 0;
+      font-size:16px;
+      font-weight:950;
+      color:#111;
+    }
+    .money{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      text-align:right;
+      min-width:0;
+    }
+
+    /* Accessibility */
+    .sr-only{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+    }
+  <body</style>
+</head>
+
+>
+  <!-- TEST BUTTONS (outside the screen form area) -->
+  <div class="test-panel" aria-label="Панель тестирования статусов">
+    <div class="test-panel__title">
+      <div class="test-panel__badge">Т</div>
+      Тест: смена статуса заказа
+      <span class="muted" id="testCurrentStatus">—</span>
+    </div>
+    <div class="test-panel__row">
+      <button class="btn btn--primary" data-set="created">Создан</button>
+      <button class="btn" data-set="accepted">Принят</button>
+      <button class="btn" data-set="cooking">В производстве</button>
+      <button class="btn" data-set="ready">Готов</button>
+      <button class="btn" data-set="issued">Выдан</button>
+      <button class="btn btn--danger" data-set="not_received">Не получен</button>
+      <button class="btn btn--ghost" id="btnToggleQueue">Показать/скрыть очередь</button>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section class="screen" aria-label="Экранная форма Мой заказ">
+      <!-- LEFT: ORDER CONTENT -->
+      <div class="card" role="region" aria-label="Мой заказ">
+        <div class="card__header">
+          <div class="brand">
+            <div class="logo" aria-hidden="true">Т</div>
+            <div class="brand__meta">
+              <h1 class="brand__title">Мой заказ</h1>
+              <p class="brand__subtitle" id="subtitleLine">Сегодня • Обед</p>
+            </div>
+          </div>
+          <div class="chip" title="Текущее состояние заказа">
+            <span class="chip__dot" id="statusDot"></span>
+            <span id="statusText">Создан</span>
+          </div>
+        </div>
+
+        <div class="card__body">
+          <div class="grid-2">
+            <div class="field">
+              <p class="field__label">Идентификатор</p>
+              <p class="field__value" id="orderId">ORD-20260314-00427</p>
+            </div>
+
+            <div class="field">
+              <p class="field__label">Время оформления</p>
+              <p class="field__value" id="createdTime">14.03.2026 • 12:41</p>
+            </div>
+
+            <div class="field">
+              <p class="field__label">Слот питания</p>
+              <p class="field__value" id="slotText">
+                Обед <span class="pill pill--yellow"><span class="pill__dot" aria-hidden="true"></span><span id="slotWindow">12:30–17:00</span></span>
+              </p>
+            </div>
+
+            <div class="field" id="queueField">
+              <p class="field__label">Очередь</p>
+              <p class="field__value">
+                <span class="pill pill--blue" id="queuePill">
+                  <span class="pill__dot" aria-hidden="true"></span>
+                  Номер: <span id="queueNumber">18</span>
+                </span>
+                <span class="muted" id="queueHint">Ориентир: ~<span id="eta">8</span> мин</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <h2>Состав заказа</h2>
+            <div class="muted" id="itemsCount">6 позиций</div>
+          </div>
+
+          <div class="items" id="items">
+            <div class="item">
+              <div>
+                <p class="item__name">Суп куриный с лапшой</p>
+                <p class="item__meta">
+                  <span class="kcal">245 ккал</span>
+                  <span>Подача: горячее</span>
+                </p>
+              </div>
+              <div class="qty" aria-label="Количество">1</div>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="item__name">Салат «Овощной» (огурец, томат, зелень)</p>
+                <p class="item__meta">
+                  <span class="kcal">120 ккал</span>
+                  <span>Заправка: оливковое масло</span>
+                </p>
+              </div>
+              <div class="qty" aria-label="Количество">1</div>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="item__name">Куриное филе на гриле</p>
+                <p class="item__meta">
+                  <span class="kcal">310 ккал</span>
+                  <span>Без панировки</span>
+                </p>
+              </div>
+              <div class="qty" aria-label="Количество">1</div>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="item__name">Гречка с овощами</p>
+                <p class="item__meta">
+                  <span class="kcal">210 ккал</span>
+                  <span>Гарнир</span>
+                </p>
+              </div>
+              <div class="qty" aria-label="Количество">1</div>
+            </div>
+
+            <div class="item">
+              <div>
+                <p class="item__name">Компот из сухофруктов</p>
+                <p class="item__meta">
+                  <span class="kcal">95 ккал</span>
+                  <span>Напиток</span>
+                </p>
+              </div>
+              <div class="qty" aria-label="Количество">1</div>
+            </div>
+          </div>
+
+          <div class="rule" role="note" aria-label="Правило оформления">
+            <div class="rule__icon" aria-hidden="true">!</div>
+            <p class="rule__text">
+              Отменить или изменить заказ нельзя. Повторный заказ в этом слоте недоступен.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: STATUS + TIMELINE -->
+      <aside class="side">
+        <div class="card" role="region" aria-label="Статус и готовность">
+          <div class="card__header">
+            <div class="brand">
+              <div class="logo" aria-hidden="true">Т</div>
+              <div class="brand__meta">
+                <h1 class="brand__title" style="font-size:15px">Статус и готовность</h1>
+                <p class="brand__subtitle">Актуально для текущего слота</p>
+              </div>
+            </div>
+            <div class="chip" title="Ожидаемое состояние">
+              <span class="chip__dot" id="statusDot2"></span>
+              <span id="statusText2">Создан</span>
+            </div>
+          </div>
+
+          <div class="card__body">
+            <div class="progress">
+              <div class="big">
+                <div class="big__top">
+                  <div>
+                    <p class="big__title">Готовность</p>
+                    <p class="big__value" id="readiness">Ожидайте подтверждения</p>
+                  </div>
+                  <span class="pill pill--yellow" id="quickPill">
+                    <span class="pill__dot" aria-hidden="true"></span>
+                    <span id="quickPillText">В обработке</span>
+                  </span>
+                </div>
+                <p class="hint" id="readinessHint">
+                  После сборки вы получите уведомление о готовности. Для выдачи предъявите бейдж на линии раздачи.
+                </p>
+              </div>
+
+              <div class="steps" aria-label="Этапы заказа">
+                <p class="steps__title">Этапы</p>
+
+                <div class="step">
+                  <div class="step__dot" id="dotCreated" aria-hidden="true"></div>
+                  <div class="step__text">
+                    <p class="step__name">Создан</p>
+                    <p class="step__time" id="tCreated">12:41</p>
+                  </div>
+                </div>
+
+                <div class="step">
+                  <div class="step__dot" id="dotAccepted" aria-hidden="true"></div>
+                  <div class="step__text">
+                    <p class="step__name">Принят</p>
+                    <p class="step__time" id="tAccepted">—</p>
+                  </div>
+                </div>
+
+                <div class="step">
+                  <div class="step__dot" id="dotCooking" aria-hidden="true"></div>
+                  <div class="step__text">
+                    <p class="step__name">В производстве</p>
+                    <p class="step__time" id="tCooking">—</p>
+                  </div>
+                </div>
+
+                <div class="step">
+                  <div class="step__dot" id="dotReady" aria-hidden="true"></div>
+                  <div class="step__text">
+                    <p class="step__name">Готов</p>
+                    <p class="step__time" id="tReady">—</p>
+                  </div>
+                </div>
+
+                <div class="step">
+                  <div class="step__dot" id="dotIssued" aria-hidden="true"></div>
+                  <div class="step__text">
+                    <p class="step__name">Выдан</p>
+                    <p class="step__time" id="tIssued">—</p>
+                  </div>
+                </div>
+
+                <div class="step">
+                  <div class="step__dot" id="dotNotReceived" aria-hidden="true"></div>
+                  <div class="step__text">
+                    <p class="step__name">Не получен</p>
+                    <p class="step__time" id="tNotReceived">—</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="divider" role="separator" aria-hidden="true"></div>
+
+              <div class="summary" aria-label="Итоги заказа">
+                <div>
+                  <p class="summary__label">Итого позиций</p>
+                  <p class="summary__value"><span id="totalQty">7</span></p>
+                </div>
+                <div class="money">
+                  <p class="summary__label">Статус</p>
+                  <p class="summary__value" id="summaryStatus">Создан</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const ui = {
+      statusText: document.getElementById('statusText'),
+      statusText2: document.getElementById('statusText2'),
+      summaryStatus: document.getElementById('summaryStatus'),
+      statusDot: document.getElementById('statusDot'),
+      statusDot2: document.getElementById('statusDot2'),
+      readiness: document.getElementById('readiness'),
+      readinessHint: document.getElementById('readinessHint'),
+      quickPill: document.getElementById('quickPill'),
+      quickPillText: document.getElementById('quickPillText'),
+      testCurrentStatus: document.getElementById('testCurrentStatus'),
+
+      queueField: document.getElementById('queueField'),
+      queuePill: document.getElementById('queuePill'),
+      queueNumber: document.getElementById('queueNumber'),
+      eta: document.getElementById('eta'),
+      queueHint: document.getElementById('queueHint'),
+
+      dots: {
+        created: document.getElementById('dotCreated'),
+        accepted: document.getElementById('dotAccepted'),
+        cooking: document.getElementById('dotCooking'),
+        ready: document.getElementById('dotReady'),
+        issued: document.getElementById('dotIssued'),
+        not_received: document.getElementById('dotNotReceived'),
+      },
+      times: {
+        created: document.getElementById('tCreated'),
+        accepted: document.getElementById('tAccepted'),
+        cooking: document.getElementById('tCooking'),
+        ready: document.getElementById('tReady'),
+        issued: document.getElementById('tIssued'),
+        not_received: document.getElementById('tNotReceived'),
+      }
+    };
+
+    const STATES = {
+      created: {
+        label: 'Создан',
+        dotColor: '#9ca3af',
+        pillClass: 'pill--yellow',
+        pillText: 'В обработке',
+        readiness: 'Ожидайте подтверждения',
+        hint: 'Заказ зарегистрирован. Ожидайте принятия на линии сборки.',
+        showQueue: true,
+      },
+      accepted: {
+        label: 'Принят',
+        dotColor: '#3b82f6',
+        pillClass: 'pill--blue',
+        pillText: 'Принят',
+        readiness: 'Принят к работе',
+        hint: 'Заказ принят. Сборка начнется по очереди.',
+        showQueue: true,
+      },
+      cooking: {
+        label: 'В производстве',
+        dotColor: '#f59e0b',
+        pillClass: 'pill--yellow',
+        pillText: 'Готовится',
+        readiness: 'Собираем заказ',
+        hint: 'Заказ находится в сборке. Следите за статусом.',
+        showQueue: true,
+      },
+      ready: {
+        label: 'Готов',
+        dotColor: '#22c55e',
+        pillClass: 'pill--green',
+        pillText: 'Можно получать',
+        readiness: 'Готов к выдаче',
+        hint: 'Подойдите к линии раздачи и предъявите бейдж для выдачи.',
+        showQueue: false,
+      },
+      issued: {
+        label: 'Выдан',
+        dotColor: '#22c55e',
+        pillClass: 'pill--green',
+        pillText: 'Завершен',
+        readiness: 'Заказ выдан',
+        hint: 'Спасибо. Заказ завершен.',
+        showQueue: false,
+      },
+      not_received: {
+        label: 'Не получен',
+        dotColor: '#ef4444',
+        pillClass: 'pill--red',
+        pillText: 'Завершен',
+        readiness: 'Не получен',
+        hint: 'Заказ не был получен в рамках слота питания.',
+        showQueue: false,
+      }
+    };
+
+    const order = {
+      state: 'created',
+      timestamps: {
+        created: '12:41',
+        accepted: null,
+        cooking: null,
+        ready: null,
+        issued: null,
+        not_received: null
+      },
+      queue: {
+        number: 18,
+        etaMin: 8,
+        visible: true
+      }
+    };
+
+    function setDot(el, mode){
+      el.classList.remove('step__dot--done','step__dot--active','step__dot--fail');
+      if(mode) el.classList.add(mode);
+    }
+
+    function setPillStyle(pill, pillClass){
+      pill.classList.remove('pill--yellow','pill--green','pill--red','pill--blue');
+      pill.classList.add(pillClass);
+    }
+
+    function applyState(stateKey){
+      const s = STATES[stateKey];
+      order.state = stateKey;
+
+      // Header texts
+      ui.statusText.textContent = s.label;
+      ui.statusText2.textContent = s.label;
+      ui.summaryStatus.textContent = s.label;
+
+      ui.statusDot.style.background = s.dotColor;
+      ui.statusDot2.style.background = s.dotColor;
+
+      // Right card
+      ui.readiness.textContent = s.readiness;
+      ui.readinessHint.textContent = s.hint;
+      ui.quickPillText.textContent = s.pillText;
+      setPillStyle(ui.quickPill, s.pillClass);
+
+      // Test panel label
+      ui.testCurrentStatus.textContent = `Текущий: ${s.label}`;
+
+      // Queue visibility
+      const queueShouldShow = order.queue.visible && s.showQueue;
+      ui.queueField.style.display = queueShouldShow ? '' : 'none';
+
+      // Timeline dots
+      const flow = ['created','accepted','cooking','ready','issued'];
+      const isTerminalFail = (stateKey === 'not_received');
+      const currentIdx = flow.indexOf(stateKey);
+
+      // created always exists
+      ui.times.created.textContent = order.timestamps.created || '—';
+      ui.times.accepted.textContent = order.timestamps.accepted || '—';
+      ui.times.cooking.textContent = order.timestamps.cooking || '—';
+      ui.times.ready.textContent = order.timestamps.ready || '—';
+      ui.times.issued.textContent = order.timestamps.issued || '—';
+      ui.times.not_received.textContent = order.timestamps.not_received || '—';
+
+      // Reset
+      Object.values(ui.dots).forEach(d => setDot(d, null));
+
+      // Mark progress
+      if(isTerminalFail){
+        setDot(ui.dots.created,'step__dot--done');
+        if(order.timestamps.accepted) setDot(ui.dots.accepted,'step__dot--done');
+        if(order.timestamps.cooking) setDot(ui.dots.cooking,'step__dot--done');
+        if(order.timestamps.ready) setDot(ui.dots.ready,'step__dot--done');
+        if(order.timestamps.issued) setDot(ui.dots.issued,null);
+        setDot(ui.dots.not_received,'step__dot--fail');
+      } else {
+        flow.forEach((k, idx) => {
+          if(idx < currentIdx) setDot(ui.dots[k], 'step__dot--done');
+          else if(idx === currentIdx) setDot(ui.dots[k], 'step__dot--active');
+          else setDot(ui.dots[k], null);
+        });
+        // Not received stays inactive
+      }
+    }
+
+    function stampIfEmpty(key){
+      if(order.timestamps[key]) return;
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      order.timestamps[key] = `${hh}:${mm}`;
+      ui.times[key].textContent = order.timestamps[key];
+    }
+
+    function transitionTo(stateKey){
+      // set reasonable timestamps based on transitions (no new fields, only visual)
+      if(stateKey === 'accepted') stampIfEmpty('accepted');
+      if(stateKey === 'cooking'){
+        stampIfEmpty('accepted');
+        stampIfEmpty('cooking');
+      }
+      if(stateKey === 'ready'){
+        stampIfEmpty('accepted');
+        stampIfEmpty('cooking');
+        stampIfEmpty('ready');
+      }
+      if(stateKey === 'issued'){
+        stampIfEmpty('accepted');
+        stampIfEmpty('cooking');
+        stampIfEmpty('ready');
+        stampIfEmpty('issued');
+      }
+      if(stateKey === 'not_received'){
+        // could happen without выдачи
+        stampIfEmpty('not_received');
+      }
+      applyState(stateKey);
+    }
+
+    // Buttons
+    document.querySelectorAll('[data-set]').forEach(btn=>{
+      btn.addEventListener('click', () => transitionTo(btn.dataset.set));
+    });
+
+    document.getElementById('btnToggleQueue').addEventListener('click', ()=>{
+      order.queue.visible = !order.queue.visible;
+      applyState(order.state);
+    });
+
+    // Initial values
+    ui.queueNumber.textContent = order.queue.number;
+    ui.eta.textContent = order.queue.etaMin;
+
+    // Make step timestamps consistent with initial created time
+    ui.times.created.textContent = order.timestamps.created;
+
+    applyState(order.state);
+
+    // Total qty from UI (no new fields in data model)
+    (function calcTotalQty(){
+      const qtyEls = document.querySelectorAll('.items .qty');
+      let total = 0;
+      qtyEls.forEach(el => total += Number(el.textContent.trim()) || 0);
+      document.getElementById('totalQty').textContent = total;
+      document.getElementById('itemsCount').textContent = `${qtyEls.length} позиций`;
+    })();
+  </script>
+</body>
+</html>
