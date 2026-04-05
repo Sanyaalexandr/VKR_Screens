@@ -1,0 +1,763 @@
+<!doctype <html<html>
+ <headlang="ru">
+>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Отправка заявки на закупку</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --surface-2:#fff7cc;
+      --text:#111111;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --shadow: 0 10px 30px rgba(17,17,17,.08);
+
+      --t-yellow:#ffd100;
+      --t-yellow-2:#ffdf4d;
+      --t-yellow-soft:#fff3b0;
+
+      --ok:#0f9d58;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+
+      --focus: 0 0 0 4px rgba(255,209,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --radius-xs: 10px;
+
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(255,209,0,.22), transparent 60%),
+        radial-gradient(900px 600px at 90% 0%, rgba(255,209,0,.12), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      font-family:var(--font);
+    }
+
+    a{color:inherit}
+    .app{
+      min-height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Topbar */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:saturate(1.2) blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+    .topbar__inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:260px;
+    }
+    .logo{
+      width:40px;height:40px;
+      border-radius:14px;
+      background:linear-gradient(135deg, var(--t-yellow), var(--t-yellow-2));
+      display:grid;place-items:center;
+      box-shadow:0 10px 20px rgba(255,209,0,.35);
+      border:1px solid rgba(17,17,17,.08);
+      flex:0 0 auto;
+    }
+    .logo span{
+      font-weight:900;
+      font-size:22px;
+      letter-spacing:.5px;
+    }
+    .brand__text{
+      display:flex;
+      flex-direction:column;
+      line-height:1.15;
+    }
+    .brand__title{
+      font-weight:800;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .brand__subtitle{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .topbar__actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background:var(--surface);
+      color:var(--muted);
+      font-size:12px;
+      max-width:100%;
+    }
+    .chip strong{color:var(--text); font-weight:700}
+    .mono{font-family:var(--mono)}
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--warn);
+      box-shadow:0 0 0 4px rgba(245,158,11,.14);
+      flex:0 0 auto;
+    }
+
+    /* Layout */
+    main{
+      flex:1 1 auto;
+    }
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      padding:18px 18px 26px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+    }
+
+    /* Cards */
+    .card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card__head{
+      padding:16px 16px 12px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      background:linear-gradient(180deg, rgba(255,209,0,.16), rgba(255,209,0,.00));
+    }
+    .card__title{
+      margin:0;
+      font-size:18px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .card__desc{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      max-width:72ch;
+    }
+    .card__body{padding:16px}
+
+    /* Form */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.25fr 1.25fr .9fr 1.35fr;
+      gap:12px;
+    }
+    @media (max-width: 1050px){
+      .grid{grid-template-columns: 1fr 1fr}
+    }
+    @media (max-width: 620px){
+      .grid{grid-template-columns: 1fr}
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    label{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .control{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:11px 12px;
+      font-size:14px;
+      background:#fff;
+      outline:none;
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    .control:focus{
+      border-color: rgba(255,209,0,.75);
+      box-shadow: var(--focus);
+    }
+    .control[disabled]{
+      background:#fafafa;
+      color:#9ca3af;
+      cursor:not-allowed;
+    }
+    .helper{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .statusPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--surface);
+      font-size:13px;
+      color:var(--text);
+      white-space:nowrap;
+    }
+    .statusPill .badge{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--warn);
+      box-shadow: 0 0 0 4px rgba(245,158,11,.14);
+    }
+
+    /* Table */
+    .tableWrap{
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:#fff;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      font-size:13px;
+    }
+    thead th{
+      text-align:left;
+      padding:12px 12px;
+      color:var(--muted);
+      font-weight:800;
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,209,0,.14), rgba(255,209,0,.04));
+    }
+    tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      background:#fff;
+    }
+    tbody tr:hover td{
+      background: rgba(255,209,0,.08);
+    }
+    tbody tr:last-child td{border-bottom:none}
+    .cell-muted{color:var(--muted)}
+    .cell-right{text-align:right}
+    .cell-center{text-align:center}
+    .cell-nowrap{white-space:nowrap}
+
+    .qty{
+      width:130px;
+      text-align:right;
+      font-variant-numeric: tabular-nums;
+    }
+    .comment{
+      width:100%;
+      min-width:180px;
+    }
+
+    /* Email field */
+    .email-field{
+      margin-bottom: 16px;
+    }
+    .email-field .control{
+      border-width: 2px;
+    }
+
+    /* Footer actions */
+    .actionsBar{
+      position:sticky;
+      bottom:0;
+      z-index:5;
+      margin-top:10px;
+      padding:12px;
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.92);
+      backdrop-filter:saturate(1.2) blur(10px);
+      box-shadow: 0 10px 30px rgba(17,17,17,.10);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .actionsLeft, .actionsRight{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:1px solid rgba(17,17,17,.10);
+      background:#fff;
+      border-radius:14px;
+      padding:10px 12px;
+      font-weight:800;
+      font-size:13px;
+      cursor:pointer;
+      transition: transform .05s ease, box-shadow .15s ease, border-color .15s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn:focus{outline:none; box-shadow: var(--focus)}
+    .btn--primary{
+      background: linear-gradient(135deg, var(--t-yellow), var(--t-yellow-2));
+      border-color: rgba(17,17,17,.12);
+    }
+    .btn--ghost{
+      background:#fff;
+    }
+    .btn--danger{
+      background: rgba(239,68,68,.08);
+      border-color: rgba(239,68,68,.30);
+      color:#991b1b;
+    }
+
+    .summary{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .summary strong{color:var(--text)}
+    .divider{
+      width:1px;height:18px;background:var(--border);
+    }
+
+    /* Modal */
+    .modalOverlay{
+      position:fixed; inset:0;
+      background:rgba(17,17,17,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:50;
+    }
+    .modal{
+      width:min(720px, 100%);
+      background:#fff;
+      border-radius:18px;
+      border:1px solid rgba(255,209,0,.35);
+      box-shadow: 0 25px 70px rgba(17,17,17,.22);
+      overflow:hidden;
+    }
+    .modal__head{
+      padding:14px 14px 10px;
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,209,0,.18), rgba(255,209,0,.02));
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .modal__title{
+      margin:0;
+      font-size:15px;
+      font-weight:900;
+    }
+    .modal__body{
+      padding:14px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+      max-height:60vh;
+      overflow:auto;
+      white-space:pre-wrap;
+      font-family:var(--mono);
+      background:#fff;
+    }
+    .modal__foot{
+      padding:12px 14px;
+      border-top:1px solid var(--border);
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      background:#fff;
+    }
+
+    .srOnly{
+      position:absolute !important;
+      height:1px;width:1px;
+      overflow:hidden;
+      clip:rect(1px,1px,1px,1px);
+      white-space:nowrap;
+    }
+  <body</style>
+</head>
+
+>
+<div class="app">
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><span>Т</span></div>
+        <div class="brand__text">
+          <div class="brand__title">ИС корпоративной столовой</div>
+          <div class="brand__subtitle">Закупки · Отправка заявки</div>
+        </div>
+      </div>
+
+      <div class="topbar__actions">
+        <div class="chip" title="Идентификатор документа">
+          <span class="dot" aria-hidden="true"></span>
+          <span>Документ:</span>
+          <strong class="mono" id="docId">PR-202604-01</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <section class="card" aria-labelledby="h1">
+        <div class="card__head">
+          <div>
+            <h1 class="card__title" id="h1">Отправка сформированной заявки на закупку</h1>
+            <p class="card__desc">
+              Заявка формируется и отправляется по электронной почте поставщику.
+              Укажите адрес получателя и подтвердите отправку.
+            </p>
+          </div>
+        </div>
+
+        <div class="card__body">
+          <div class="grid" role="form" aria-label="Параметры документа">
+            <div class="field">
+              <label for="periodStart">Период закупки — начало</label>
+              <input class="control" id="periodStart" type="date" disabled />
+            </div>
+
+            <div class="field">
+              <label for="periodEnd">Период закупки — окончание</label>
+              <input class="control" id="periodEnd" type="date" disabled />
+            </div>
+
+            <div class="field">
+              <label for="createdAt">Дата и время формирования</label>
+              <input class="control" id="createdAt" type="text" disabled />
+            </div>
+
+            <div class="field">
+              <label for="contract">Договор поставки</label>
+              <input class="control" id="contract" type="text" disabled />
+              <div class="helper" id="contractHelper" style="margin-top:4px;">
+                Email поставщика: <span id="supplierEmail" style="font-weight:600;"></span>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;" class="email-field">
+            <label for="recipientEmail" style="font-weight:800; margin-bottom:8px;">Email получателя</label>
+            <input class="control" id="recipientEmail" type="email" placeholder="Введите email адрес поставщика" style="font-size:15px;" />
+            <div class="helper">Заявка будет отправлена на указанный электронный адрес в формате CSV.</div>
+          </div>
+
+          <div style="margin-top:14px;" class="tableWrap" aria-label="Сводные данные заявки">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:46%;">Номенклатура</th>
+                  <th style="width:14%;">Единица</th>
+                  <th style="width:14%;" class="cell-right">Количество</th>
+                  <th style="width:26%;">Комментарий</th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div class="actionsBar" aria-label="Панель действий">
+        <div class="summary" aria-live="polite">
+          <span class="pillMini">Позиции: <strong id="sumLines">0</strong></span>
+          <span class="divider" aria-hidden="true"></span>
+          <span class="pillMini">Требуют внимания: <strong id="sumIssues">0</strong></span>
+        </div>
+
+        <div class="actionsRight">
+          <button class="btn btn--primary" id="btnSend" type="button">
+            Отправить заявку
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="modalOverlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modal__head">
+        <div>
+          <h2 class="modal__title" id="modalTitle">Результат отправки</h2>
+          <div class="helper" id="modalSubtitle">Статус операции</div>
+        </div>
+        <button class="btn btn--ghost" id="btnCloseModal" type="button">Закрыть</button>
+      </div>
+      <div class="modal__body" id="modalBody"></div>
+      <div class="modal__foot">
+        <button class="btn btn--primary" id="btnCloseModalFooter" type="button">ОК</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Данные соответствуют сущностям "Заявка на закупку" + "Строка заявки" + "Сырьё" + "Единица измерения" + "Договор поставки"
+  const state = {
+    id: "PR-202604-01",
+    status: "Утверждена",
+    periodStart: "2026-04-01",
+    periodEnd: "2026-04-30",
+    createdAt: new Date().toLocaleString("ru-RU"),
+    contract: {
+      id: "ДОГ-2026-04-001",
+      supplierEmail: "supplier@company.com"
+    },
+
+    // строки: количество + комментарий
+    rows: [
+      { id: "L-001", itemName: "Молоко пастеризованное", uom: "л", qty: 120, comment: "" },
+      { id: "L-002", itemName: "Куриное филе", uom: "кг", qty: 85, comment: "" },
+      { id: "L-003", itemName: "Рис", uom: "кг", qty: 60, comment: "Проверить остатки перед заказом" },
+      { id: "L-004", itemName: "Огурцы свежие", uom: "кг", qty: 0, comment: "" },
+      { id: "L-005", itemName: "Соль", uom: "кг", qty: 5, comment: "" }
+    ]
+  };
+
+  const el = (id) => document.getElementById(id);
+
+  const docId = el("docId");
+  const periodStart = el("periodStart");
+  const periodEnd = el("periodEnd");
+  const createdAt = el("createdAt");
+  const contract = el("contract");
+  const recipientEmail = el("recipientEmail");
+
+  const tbody = el("rows");
+  const sumLines = el("sumLines");
+  const sumIssues = el("sumIssues");
+
+  const btnSend = el("btnSend");
+
+  const modalOverlay = el("modalOverlay");
+  const modalBody = el("modalBody");
+  const modalTitle = el("modalTitle");
+  const modalSubtitle = el("modalSubtitle");
+  const btnCloseModal = el("btnCloseModal");
+  const btnCloseModalFooter = el("btnCloseModalFooter");
+
+  function fmtQty(v){
+    const n = Number(v);
+    if (!Number.isFinite(n)) return "";
+    return n.toLocaleString("ru-RU", { maximumFractionDigits: 3 });
+  }
+
+  function rowIssueLevel(r){
+    const qty = Number(r.qty);
+    if (!r.itemName) return "bad";
+    if (!Number.isFinite(qty)) return "bad";
+    if (qty < 0) return "bad";
+    if (qty === 0) return "warn";
+    if (qty > 10000) return "warn";
+    return "ok";
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function render(){
+    docId.textContent = state.id;
+    periodStart.value = state.periodStart;
+    periodEnd.value = state.periodEnd;
+    createdAt.value = state.createdAt;
+    contract.value = state.contract.id;
+
+    let html = "";
+    let issuesCount = 0;
+
+    for (const r of state.rows){
+      const level = rowIssueLevel(r);
+      if (level !== "ok") issuesCount++;
+
+      html += `
+        <tr data-id="${escapeHtml(r.id)}">
+          <td>
+            <div style="display:flex; gap:10px; align-items:flex-start;">
+              <div class="rowFlag" title="${level === 'ok' ? 'Без замечаний' : level === 'warn' ? 'Требует внимания' : 'Ошибка'}">
+                <span class="flagDot ${level}"></span>
+              </div>
+              <div style="min-width:0;">
+                <div style="font-weight:900; line-height:1.25;">${escapeHtml(r.itemName)}</div>
+                <div class="cell-muted" style="margin-top:2px;">Строка: <span class="mono">${escapeHtml(r.id)}</span></div>
+              </div>
+            </div>
+          </td>
+          <td class="cell-nowrap">${escapeHtml(r.uom || "—")}</td>
+          <td class="cell-right">
+            <span style="font-variant-numeric: tabular-nums;">${escapeHtml(fmtQty(r.qty))}</span>
+          </td>
+          <td class="cell-muted">${escapeHtml(r.comment || "")}</td>
+        </tr>
+      `;
+    }
+
+    tbody.innerHTML = html || `<tr><td colspan="4" class="cell-muted">Нет строк.</td></tr>`;
+
+    const totalLines = state.rows.length;
+    const totalIssues = state.rows.reduce((acc, r) => acc + (rowIssueLevel(r) === "ok" ? 0 : 1), 0);
+    sumLines.textContent = String(totalLines);
+    sumIssues.textContent = String(totalIssues);
+
+    btnSend.disabled = !recipientEmail.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail.value);
+  }
+
+  function closeModal(){
+    modalOverlay.style.display = "none";
+  }
+
+  function send(){
+    const email = recipientEmail.value.trim();
+    if (!email){
+      alert("Введите email получателя");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      modalTitle.textContent = "Ошибка";
+      modalSubtitle.textContent = "Некорректный email адрес";
+      modalBody.textContent = `Пожалуйста, введите корректныйemail адрес (например: supplier@company.com)`;
+      modalOverlay.style.display = "flex";
+      return;
+    }
+
+    const csv = generateCsv();
+    const subject = `Заявка на закупку ${state.id}`;
+    const body = `Заявка на закупку №${state.id}\n\nПериод: ${state.periodStart} — ${state.periodEnd}\nДоговор: ${state.contractId || "—"}\n\nПрикрепляется CSV-файл с позициями заявки.\n\n--\nИС корпоративной столовой`;
+
+    modalTitle.textContent = "Отправка заявки";
+    modalSubtitle.textContent = `Заявка ${state.id} будет отправлена на ${email}`;
+    modalBody.textContent =
+`Подготовка email:
+
+Кому: ${email}
+Тема: ${subject}
+
+Тело сообщения:
+${body}
+
+Содержимое CSV:
+${csv}
+
+(В реальной системе здесь будет отправка через SMTP API)`;
+
+    modalOverlay.style.display = "flex";
+  }
+
+  function generateCsv(){
+    const header = ["Номенклатура","Единица","Количество","Комментарий"];
+    const lines = [header.join(";")];
+
+    for (const r of state.rows){
+      const line = [
+        `"${String(r.itemName).replaceAll('"','""')}"`,
+        `"${String(r.uom ?? "").replaceAll('"','""')}"`,
+        String(r.qty).replace(".", ","),
+        `"${String(r.comment ?? "").replaceAll('"','""')}"`
+      ];
+      lines.push(line.join(";"));
+    }
+
+    const meta = [
+      `Документ: ${state.id}`,
+      `Статус: ${state.status}`,
+      `Период: ${state.periodStart} — ${state.periodEnd}`,
+      `Сформирован: ${state.createdAt}`,
+      `Договор: ${state.contract.id}`
+    ].join("\n");
+
+    return meta + "\n\n" + lines.join("\n");
+  }
+
+  function init(){
+    periodStart.value = state.periodStart;
+    periodEnd.value = state.periodEnd;
+    createdAt.value = state.createdAt;
+    contract.value = state.contract.id;
+
+    // Отображаем email поставщика из договора
+    const supplierEmailEl = document.getElementById('supplierEmail');
+    if (supplierEmailEl && state.contract.supplierEmail) {
+      supplierEmailEl.textContent = state.contract.supplierEmail;
+    }
+
+    // Автоматически заполняем email в поле получателя, если оно пустое
+    if (!recipientEmail.value.trim() && state.contract.supplierEmail) {
+      recipientEmail.value = state.contract.supplierEmail;
+    }
+
+    recipientEmail.addEventListener("input", render);
+    btnSend.addEventListener("click", send);
+
+    btnCloseModal.addEventListener("click", closeModal);
+    btnCloseModalFooter.addEventListener("click", closeModal);
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modalOverlay.style.display === "flex") closeModal();
+    });
+
+    render();
+  }
+
+  init();
+</script>
+</body>
+</html>
