@@ -542,28 +542,17 @@
   </div>
 </div>
 
-<script>
-  // Данные соответствуют сущностям "Заявка на закупку" + "Строка заявки" + "Сырьё" + "Единица измерения" + "Договор поставки"
-  const state = {
-    id: "PR-202604-01",
-    status: "Утверждена",
-    periodStart: "2026-04-01",
-    periodEnd: "2026-04-30",
-    createdAt: new Date().toLocaleString("ru-RU"),
-    contract: {
-      id: "ДОГ-2026-04-001",
-      supplierEmail: "supplier@company.com"
-    },
-
-    // строки: количество + комментарий
-    rows: [
-      { id: "L-001", itemName: "Молоко пастеризованное", uom: "л", qty: 120, comment: "" },
-      { id: "L-002", itemName: "Куриное филе", uom: "кг", qty: 85, comment: "" },
-      { id: "L-003", itemName: "Рис", uom: "кг", qty: 60, comment: "Проверить остатки перед заказом" },
-      { id: "L-004", itemName: "Огурцы свежие", uom: "кг", qty: 0, comment: "" },
-      { id: "L-005", itemName: "Соль", uom: "кг", qty: 5, comment: "" }
-    ]
-  };
+<script src="заявка-data.js"></script>
+  <script>
+    // Данные соответствуют сущностям "Заявка на закупку" + "Строка заявки" + "Сырьё" + "Единица измерения" + "Договор поставки"
+    const state = {
+      ...window.purchaseRequestData,
+      status: "Утверждена",
+      contract: {
+        id: "Договор № 07/25 от 2025-01-15",
+        supplierEmail: "supplier@company.com"
+      }
+    };
 
   const el = (id) => document.getElementById(id);
 
@@ -587,30 +576,6 @@
   const btnCloseModal = el("btnCloseModal");
   const btnCloseModalFooter = el("btnCloseModalFooter");
 
-  function fmtQty(v){
-    const n = Number(v);
-    if (!Number.isFinite(n)) return "";
-    return n.toLocaleString("ru-RU", { maximumFractionDigits: 3 });
-  }
-
-  function rowIssueLevel(r){
-    const qty = Number(r.qty);
-    if (!r.itemName) return "bad";
-    if (!Number.isFinite(qty)) return "bad";
-    if (qty < 0) return "bad";
-    if (qty === 0) return "warn";
-    if (qty > 10000) return "warn";
-    return "ok";
-  }
-
-  function escapeHtml(str){
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
 
   function render(){
     docId.textContent = state.id;
@@ -679,7 +644,7 @@
 
     const csv = generateCsv();
     const subject = `Заявка на закупку ${state.id}`;
-    const body = `Заявка на закупку №${state.id}\n\nПериод: ${state.periodStart} — ${state.periodEnd}\nДоговор: ${state.contractId || "—"}\n\nПрикрепляется CSV-файл с позициями заявки.\n\n--\nИС корпоративной столовой`;
+    const body = `Заявка на закупку №${state.id}\n\nПериод: ${state.periodStart} — ${state.periodEnd}\nДоговор: ${state.contract.id || "—"}\n\nПрикрепляется CSV-файл с позициями заявки.\n\n--\nИС корпоративной столовой`;
 
     modalTitle.textContent = "Отправка заявки";
     modalSubtitle.textContent = `Заявка ${state.id} будет отправлена на ${email}`;
