@@ -325,10 +325,6 @@
               <p class="brand__subtitle" id="subtitleLine">Сегодня · Обед</p>
             </div>
           </div>
-          <div class="chip" title="Статус">
-            <span class="chip__dot" id="statusDot"></span>
-            <span id="statusText">Черновик</span>
-          </div>
         </div>
 
         <div class="card__body">
@@ -595,8 +591,6 @@
     // ===== STATUS =====
     function updateStatus(){
       submitted = false;
-      $("statusText").textContent = state.cart.length ? "Черновик" : "Нет заказа";
-      $("statusDot").style.background = state.cart.length ? "#f59e0b" : "#9ca3af";
     }
 
     // ===== REFRESH =====
@@ -643,11 +637,8 @@
     $("modalConfirm").addEventListener("click", ()=>{
       closeModal();
       submitted = true;
-      const count = state.cart.length;
       state.cart = [];
       refresh();
-      $("statusText").textContent = "Отправлен";
-      $("statusDot").style.background = "#22c55e";
       openSuccess();
     });
 
