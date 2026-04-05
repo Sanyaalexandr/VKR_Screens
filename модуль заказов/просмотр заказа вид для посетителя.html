@@ -605,62 +605,7 @@
             <div class="muted" id="itemsCount">6 позиций</div>
           </div>
 
-          <div class="items" id="items">
-            <div class="item">
-              <div>
-                <p class="item__name">Суп куриный с лапшой</p>
-                <p class="item__meta">
-                  <span class="kcal">245 ккал</span>
-                  <span>Подача: горячее</span>
-                </p>
-              </div>
-              <div class="qty" aria-label="Количество">1</div>
-            </div>
-
-            <div class="item">
-              <div>
-                <p class="item__name">Салат «Овощной» (огурец, томат, зелень)</p>
-                <p class="item__meta">
-                  <span class="kcal">120 ккал</span>
-                  <span>Заправка: оливковое масло</span>
-                </p>
-              </div>
-              <div class="qty" aria-label="Количество">1</div>
-            </div>
-
-            <div class="item">
-              <div>
-                <p class="item__name">Куриное филе на гриле</p>
-                <p class="item__meta">
-                  <span class="kcal">310 ккал</span>
-                  <span>Без панировки</span>
-                </p>
-              </div>
-              <div class="qty" aria-label="Количество">1</div>
-            </div>
-
-            <div class="item">
-              <div>
-                <p class="item__name">Гречка с овощами</p>
-                <p class="item__meta">
-                  <span class="kcal">210 ккал</span>
-                  <span>Гарнир</span>
-                </p>
-              </div>
-              <div class="qty" aria-label="Количество">1</div>
-            </div>
-
-            <div class="item">
-              <div>
-                <p class="item__name">Компот из сухофруктов</p>
-                <p class="item__meta">
-                  <span class="kcal">95 ккал</span>
-                  <span>Напиток</span>
-                </p>
-              </div>
-              <div class="qty" aria-label="Количество">1</div>
-            </div>
-          </div>
+          <div class="items" id="items"></div>
 
           <div class="rule" role="note" aria-label="Правило оформления">
             <div class="rule__icon" aria-hidden="true">!</div>
@@ -778,6 +723,7 @@
     </section>
   </main>
 
+  <script src="shared.js"></script>
   <script>
     const ui = {
       statusText: document.getElementById('statusText'),
@@ -1011,14 +957,39 @@
 
     applyState(order.state);
 
-    // Total qty from UI (no new fields in data model)
-    (function calcTotalQty(){
-      const qtyEls = document.querySelectorAll('.items .qty');
+    // Render order items from shared MENU data
+    function renderOrderItems(){
+      const itemsDiv = $('items');
+      // Demo order — same items in both files
+      const demoCart = [
+        {menuId:1, qty:1},
+        {menuId:3, qty:1},
+        {menuId:5, qty:1},
+        {menuId:7, qty:1},
+        {menuId:9, qty:1},
+      ];
+
       let total = 0;
-      qtyEls.forEach(el => total += Number(el.textContent.trim()) || 0);
+      itemsDiv.innerHTML = demoCart.map(c => {
+        const m = MENU[c.menuId];
+        if(!m) return '';
+        total += c.qty;
+        return `<div class="item">
+          <div>
+            <p class="item__name">${escapeHtml(m.name)}</p>
+            <p class="item__meta">
+              <span class="kcal">${m.kcal} ккал</span>
+              <span>${escapeHtml(m.cat)}</span>
+            </p>
+          </div>
+          <div class="qty" aria-label="Количество">${c.qty}</div>
+        </div>`;
+      }).join('');
+
       document.getElementById('totalQty').textContent = total;
-      document.getElementById('itemsCount').textContent = `${qtyEls.length} позиций`;
-    })();
+      document.getElementById('itemsCount').textContent = `${demoCart.length} позиций`;
+    }
+    renderOrderItems();
   </script>
 </body>
 </html>
